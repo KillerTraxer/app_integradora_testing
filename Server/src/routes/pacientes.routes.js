@@ -1,5 +1,5 @@
 import {Router} from "express";
-import {getPacientes, getPaciente, postPacientes} from "../controllers/pacientes.controllers.js";
+import {getPacientes, getPaciente, postPacientes, putPacientes, deletePacientes} from "../controllers/pacientes.controllers.js";
 
 const route = Router();
 
@@ -9,8 +9,8 @@ route.get("/pacientes/:id", getPaciente);
 
 route.post("/pacientes", postPacientes);
 
-route.put("/pacientes/:id");
+route.put("/pacientes/:id", putPacientes);
 
-route.delete("/pacientes/:id");
+route.delete("/pacientes/:id", deletePacientes);
 
 export default route;

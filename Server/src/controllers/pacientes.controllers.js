@@ -50,23 +50,23 @@ export const putPacientes = async (req, res) => {
         });
         res.json({mensaje:"Información del usuario actualizada"});
 
-        if(!comentarios) return res.json({mensaje:"No existe el usuario"})
+        if(!paciente) return res.json({mensaje:"No existe el usuario"})
 
     } catch (error) {
         console.log(error);
 
     }
-    
-
 }
 
 export const deletePacientes = async  (req, res) => {
     try {
-        
+        const paciente = await Paciente.findByIdAndDelete(req.params.id);
+        res.json({"message": "Usuario eliminado"});
+
+        if(!paciente) return res.json({"message": "Usuario no encontrado"});
 
     } catch (error) {
         console.log(error);
 
     }
-
 }
