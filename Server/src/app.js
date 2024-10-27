@@ -5,6 +5,7 @@ import pacientesRoutes from "./routes/pacientes.routes.js";
 import dentistaRoutes from "./routes/dentista.routes.js";
 import citasRoutes from "./routes/citas.routes.js";
 import tratamientosRoutes from "./routes/tratamientos.routes.js";
+import historiasClinicasRoutes from "./routes/historiasClinicas.routes.js";
 
 const app = express();
 
@@ -15,5 +16,6 @@ app.use(pacientesRoutes);
 app.use(dentistaRoutes);
 app.use(citasRoutes);
 app.use(tratamientosRoutes);
+app.use(historiasClinicasRoutes);
 
 export default app;
