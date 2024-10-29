@@ -25,7 +25,7 @@ export const getHistoriaClinica = async (req, res) => {
 
 export const postHistoriaClinica = async (req, res) => {
     try {
-        const {fecha, inicio_tratamiento, fin_tratamiento, domicilio, telefono, ocupacion, edad, sexo, bajo_tratamiento, si, no} = req.body;
+        const {fecha, inicio_tratamiento, fin_tratamiento, nombre_paciente, domicilio, telefono, ocupacion, edad, sexo, bajo_tratamiento, si, no, color, motivo_consulta, revision, lesion_catres,odontoxsesis, puente, prostodoncia, extraccion, habitos, bricomania, contracciones_musculares,mordida, respiracion_bucal, chupadores_de, labios, lengua, dedos, higiene_bucal,alergias, alimentacion, examen_tejidos, oclusion, esmalte, dentina, raiz, huesos, oclusion_2, encia,epitelial, pulpa, velo_paladar, carrillos, insercion, oclusion_3, sobre_mordida_vertical,mordida_abierta, desgaste, intercuspideo, desmayos, vertigos, anoclusion, mareos, otros,meses_embarazo, enfermedades, aparato_cardiovascular, sistema_nervioso,aparato_respiratorio,propension_hemorragica, pruebas_lab, estudio_radiologico, renal, digestivo, diabetes, artritis,estado_gral, observaciones, dentincion_permanente, temporal} = req.body;
 
         const newHistoriaClinica = new historiasClinica({
             fecha,
@@ -66,14 +66,14 @@ export const postHistoriaClinica = async (req, res) => {
             dentina,
             raiz,
             huesos,
-            oclusion,
+            oclusion_2,
             encia,
             epitelial,
             pulpa,
             velo_paladar,
             carrillos,
             insercion,
-            oclusion,
+            oclusion_3,
             sobre_mordida_vertical,
             mordida_abierta,
             desgaste,
