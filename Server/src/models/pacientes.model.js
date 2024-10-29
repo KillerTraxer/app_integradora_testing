@@ -6,7 +6,7 @@ const pacienteSchema = new mongoose.Schema({
         require: true,
         trim: true
     },
-    apellido: {
+    apellidos: {
         type: String,
         require: true,
         trim: true
@@ -14,12 +14,14 @@ const pacienteSchema = new mongoose.Schema({
     telefono: {
         type: String,
         require: true,
-        trim: true
+        trim: true,
+        unique: true,
     },
     email : {
         type: String,
         require: true,
-        trim: true
+        trim: true,
+        unique: true,
     },
     password: {
         type: String,

@@ -3,14 +3,14 @@ import {getHistoriasClinicas, getHistoriaClinica, postHistoriaClinica, putHistor
 
 const router = Router();
 
-router.get("/historiasClinicas", getHistoriasClinicas);
+router.get("/", getHistoriasClinicas);
 
-router.get("/historiasClinicas/:id", getHistoriaClinica);
+router.get("/:id", getHistoriaClinica);
 
-router.post("/historiasClinicas", postHistoriaClinica);
+router.post("/", postHistoriaClinica);
 
-router.put("/historiasClinicas/:id", putHistoriaClinica);
+router.put("/:id", putHistoriaClinica);
 
-router.delete("/historiasClinicas/:id", deleteHistoriaClinica);
+router.delete("/:id", deleteHistoriaClinica);
 
 export default router;

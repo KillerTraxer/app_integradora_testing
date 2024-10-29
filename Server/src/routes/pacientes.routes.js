@@ -3,14 +3,14 @@ import {getPacientes, getPaciente, postPacientes, putPacientes, deletePacientes}
 
 const route = Router();
 
-route.get("/pacientes", getPacientes);
+route.get("/", getPacientes);
 
-route.get("/pacientes/:id", getPaciente);
+route.get("/:id", getPaciente);
 
-route.post("/pacientes", postPacientes);
+route.post("/", postPacientes);
 
-route.put("/pacientes/:id", putPacientes);
+route.put("/:id", putPacientes);
 
-route.delete("/pacientes/:id", deletePacientes);
+route.delete("/:id", deletePacientes);
 
 export default route;

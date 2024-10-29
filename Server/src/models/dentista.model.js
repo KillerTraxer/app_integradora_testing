@@ -11,6 +11,11 @@ const dentistaSchema = mongoose.Schema({
         require: true,
         trim: true 
     },
+    telefono: {
+        type: String,
+        require: true,
+        trim: true
+    },
     email: {
         type: String,
         require: true,

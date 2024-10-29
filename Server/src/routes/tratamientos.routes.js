@@ -3,14 +3,14 @@ import {getTratamientos, getTratamiento, postTratamiento, putTratamiento, delete
 
 const router = Router();
 
-router.get("/tratamientos", getTratamientos);
+router.get("/", getTratamientos);
 
-router.get("/tratamientos/:id", getTratamiento);
+router.get("/:id", getTratamiento);
 
-router.post("/tratamientos", postTratamiento);
+router.post("/", postTratamiento);
 
-router.put("/tratamientos/:id", putTratamiento);
+router.put("/:id", putTratamiento);
 
-router.delete("/tratamientos/:id", deleteTratamiento);
+router.delete("/:id", deleteTratamiento);
 
 export default router;

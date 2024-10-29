@@ -3,14 +3,14 @@ import {getDentistas, getDentista, postDentista, putDentista, deleteDentista} fr
 
 const router = Router();
 
-router.get("/dentista", getDentistas);
+router.get("/", getDentistas);
 
-router.get("/dentista/:id", getDentista);
+router.get("/:id", getDentista);
 
-router.post("/dentista", postDentista);
+router.post("/", postDentista);
 
-router.put("/dentista/:id", putDentista);
+router.put("/:id", putDentista);
 
-router.delete("/dentista/:id", deleteDentista);
+router.delete("/:id", deleteDentista);
 
 export default router;

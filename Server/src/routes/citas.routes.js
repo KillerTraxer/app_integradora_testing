@@ -3,16 +3,15 @@ import {getCitas, getCita, postCita, putCita, deleteCita} from "../controllers/c
 
 const router = Router();
 
-router.get("/citas", getCitas);
+router.get("/", getCitas);
 
-router.get("/citas/:id", getCita);
+router.get("/:id", getCita);
 
-router.post("/citas", postCita);
+router.post("/", postCita);
 
-router.put("/citas/:id", putCita);
+router.put("/:id", putCita);
 
-router.delete("/citas/:id", deleteCita);
+router.delete("/:id", deleteCita);
 
 
 export default router;
-
