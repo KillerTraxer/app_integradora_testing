@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #edf2f9;
+    --foreground: #0b1727;
+    --card: #ffffff;
+    --card-foreground: #0b1727;
+    --popover: #ffffff;
+    --popover-foreground: #0b1727;
+    --primary: #0a0b12;
+    --primary-foreground: #fafafa;
+    --secondary: #f4f7fb;
+    --secondary-foreground: #0a0b12;
+    --muted: #f4f7fb;
+    --muted-foreground: #747f96;
+    --accent: #f4f7fb;
+    --accent-foreground: #0a0b12;
+    --destructive: #ff5a5a;
+    --destructive-foreground: #fafafa;
+    --border: #dfe3ea;
+    --input: #dfe3ea;
+    --ring: #0b1727;
+    --chart-1: #f08e3c;
+    --chart-2: #35a280;
+    --chart-3: #3e5e7c;
+    --chart-4: #f3c14e;
+    --chart-5: #ffb24f;
+    --radius: 0.5rem;
+    --sidebar-background: #edf2f9;
+    --sidebar-foreground: #5e6e82;
+    --sidebar-primary: #0a0b12;
+    --sidebar-primary-foreground: #fafafa;
+    --sidebar-accent: #f4f7fb;
+    --sidebar-accent-foreground: #0a0b12;
+    --sidebar-border: #edf2f9;
+    --sidebar-ring: #499dd9;
+    --icon-color: #5E6E82;
+    --card-text: #5e6e82;
+    --card-title: #344050;
+  }
+  
+  .dark {
+    --background: #0b1727;
+    --foreground: #fafafa;
+    --card: #121e2d;
+    --card-foreground: #fafafa;
+    --popover: #0b1727;
+    --popover-foreground: #fafafa;
+    --primary: #fafafa;
+    --primary-foreground: #0a0b12;
+    --secondary: #2a2d36;
+    --secondary-foreground: #fafafa;
+    --muted: #2a2d36;
+    --muted-foreground: #a3b2db;
+    --accent: #2a2d36;
+    --accent-foreground: #fafafa;
+    --destructive: #9b1b1b;
+    --destructive-foreground: #fafafa;
+    --border: #2a2d36;
+    --input: #2a2d36;
+    --ring: #d1e2e6;
+    --chart-1: #00539f;
+    --chart-2: #35a280;
+    --chart-3: #f3a05e;
+    --chart-4: #c486e5;
+    --chart-5: #f45f8e;
+    --sidebar-background: #111927;
+    --sidebar-foreground: #91979e;
+    --sidebar-primary: #346ba6;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #2a2d36;
+    --sidebar-accent-foreground: #f4f7fb;
+    --sidebar-border: #2a2d36;
+    --sidebar-ring: #499dd9;
+    --icon-color: #9da9bb;
+    --card-text: #9da9bb;
+    --card-title: #d8e2ef;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
