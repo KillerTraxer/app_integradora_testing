@@ -1,4 +1,4 @@
-import { AtSign, Lock, Eye, EyeClosed } from 'lucide-react'
+import { Mail, Lock, Eye, EyeClosed } from 'lucide-react'
 import Logo from "../assets/clinic_logo.svg";
 import { useNavigate } from 'react-router-dom';
 import { Button, Input } from "@nextui-org/react";
@@ -46,7 +46,7 @@ export default function LoginPage() {
                             <h2 className="text-3xl font-bold text-gray-900 mb-4 text-center lg:text-center">Iniciar Sesión</h2>
 
                             <form>
-                                <div className="space-y-2">
+                                <div className="space-y-4">
                                     <div>
                                         <Input
                                             value={email}
@@ -58,12 +58,10 @@ export default function LoginPage() {
                                             size='lg'
                                             placeholder='johndoe@gmail.com'
                                             startContent={
-                                                <AtSign className={`${focusState.email ? "text-primary" : "text-gray-400"} mb-0.5`} size={18} />
+                                                <Mail className={`${focusState.email ? "text-primary" : "text-gray-400"} mb-0.5`} size={18} />
                                             }
-                                            variant='underlined'
                                             onValueChange={setEmail}
                                             color={focusState.email ? "primary" : "default"}
-                                            errorMessage="Ingresa un correo valido"
                                             onFocus={() => setFocusState(prev => ({ ...prev, email: true }))}
                                             onBlur={() => setFocusState(prev => ({ ...prev, email: false }))}
                                         />
@@ -91,8 +89,7 @@ export default function LoginPage() {
                                                     )}
                                                 </button>
                                             }
-                                            variant='underlined'
-                                            color='primary'
+                                            color={focusState.password ? "primary" : "default"}
                                             onValueChange={setPassword}
                                             onFocus={() => setFocusState(prev => ({ ...prev, password: true }))}
                                             onBlur={() => setFocusState(prev => ({ ...prev, password: false }))}

@@ -1,4 +1,4 @@
-import { AtSign, Lock, Phone, User2, Eye, EyeClosed, Users, CheckCircle } from 'lucide-react'
+import { Mail, Lock, Phone, User2, Eye, EyeClosed, Users, CheckCircle } from 'lucide-react'
 import { Button, Input, Checkbox } from '@nextui-org/react';
 import { useState } from 'react';
 import React from "react";
@@ -27,8 +27,12 @@ export default function RegisterForm() {
             confirmPassword: '',
         },
         validationSchema: Yup.object({
-            name: Yup.string().required('El nombre es requerido'),
-            lastNames: Yup.string().required('Los apellidos son requeridos'),
+            name: Yup.string()
+                .matches(/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/, 'El nombre solo puede contener letras y acentos')
+                .required('El nombre es requerido'),
+            lastNames: Yup.string()
+                .matches(/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/, 'Los apellidos solo pueden contener letras y acentos')
+                .required('Los apellidos son requeridos'),
             phone: Yup.string().matches(/^\d{10}$/, 'El teléfono debe tener 10 dígitos').required('El teléfono es requerido'),
             email: Yup.string().email('Email inválido').required('El email es requerido'),
             password: Yup.string().min(8, 'La contraseña debe tener al menos 8 caracteres').required('La contraseña es requerida'),
@@ -126,7 +130,7 @@ export default function RegisterForm() {
             errorMessage={formik.touched[fieldName as keyof typeof formik.touched] && formik.errors[fieldName as keyof typeof formik.errors]}
             startContent={<Lock className={getIconColor(fieldName)} size={18} />}
             endContent={
-                <button type="button" onClick={() => setIsVisible(!isVisible)}>
+                <button className="focus:outline-none" type="button" onClick={() => setIsVisible(!isVisible)} aria-label="toggle password visibility">
                     {isVisible ? (
                         <EyeClosed className={getIconColor(fieldName)} size={18} />
                     ) : (
@@ -167,7 +171,7 @@ export default function RegisterForm() {
                     </div>
 
                     {renderInput("phone", "Teléfono", <Phone />)}
-                    {renderInput("email", "Email", <AtSign />)}
+                    {renderInput("email", "Email", <Mail />)}
                     {renderPasswordInput("password", "Contraseña", isPasswordVisible, setIsPasswordVisible)}
                     {renderPasswordInput("confirmPassword", "Confirmar Contraseña", isConfirmPasswordVisible, setIsConfirmPasswordVisible)}
                 </div>

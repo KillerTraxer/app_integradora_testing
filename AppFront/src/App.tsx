@@ -4,6 +4,7 @@ import SchedulePage from './pages/SchedulePage'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
+import VerifyAccountPage from './pages/VerifyAccountPage'
 import Home from "@/pages/Home";
 import Layout from "@/pages/Layout"
 
@@ -17,6 +18,7 @@ function App() {
         <Route path='/login' element={<LoginPage />} />
         <Route path='/register' element={<RegisterPage />} />
         <Route path='/schedule' element={<SchedulePage />} />
+        <Route path='/verifyacc' element={<VerifyAccountPage />} />
 
         {/* ROUTES WITH SIDEBAR */}
         <Route path='/home' element={<Layout><Home /></Layout>} />
