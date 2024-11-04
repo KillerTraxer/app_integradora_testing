@@ -1,5 +1,5 @@
 import Router from "express";
-import {getCitas, getCita, postCita, putCita, deleteCita} from "../controllers/citas.controllers.js";
+import {getCitas, getCita, postCita, putCita, deleteCita, postCitaPublic} from "../controllers/citas.controllers.js";
 import authenticateToken from "../middleware/authenticateToken.js";
 
 const router = Router();
@@ -12,5 +12,8 @@ router.get("/:id", getCita);
 router.post("/", postCita);
 router.put("/:id", putCita);
 router.delete("/:id", deleteCita);
+
+// Ruta pública para hacer citas sin token
+router.post("/public", postCitaPublic);
 
 export default router;

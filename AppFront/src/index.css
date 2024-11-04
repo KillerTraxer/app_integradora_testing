@@ -33,3 +33,58 @@ body {
   box-shadow: 0 0 0 2px #1D4ED8;
   /* Color azul */
 }
+
+.divider {
+  font-size: 30px;
+  display: flex;
+  align-items: center;
+}
+
+.divider::before,
+.divider::after {
+  flex: 1;
+  content: '';
+  padding: 3px;
+  background-color: red;
+  margin: 5px;
+}
+
+.ant-picker .ant-picker-input span.ant-picker-suffix {
+  margin-left: 1px;
+  margin-right: 10px;
+  order: -1;
+  color: #9ca3af;
+}
+
+.ant-picker {
+  background-color: #f4f4f5;
+  font-size: 2px;
+}
+
+.ant-picker .ant-picker-input input {
+  font-size: 14px;
+}
+
+.ant-picker .ant-picker-input>input::placeholder {
+  color: #808088;
+}
+
+.ant-picker {
+  background-color: transparent;
+}
+
+.ant-picker:hover {
+  background-color: transparent;
+}
+
+.ant-picker:active {
+  background-color: transparent;
+}
+
+.ant-picker .ant-picker-input input:active {
+  color: #2081f0;
+}
+
+.ant-form-item-label label{
+  font-size: 12px;
+}

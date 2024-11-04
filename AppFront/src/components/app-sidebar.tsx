@@ -62,7 +62,7 @@ export function AppSidebar() {
                             </button>
                         </div>
                         <SidebarGroupContent className="pt-4 pl-3">
-                            <SidebarMenu>
+                            <SidebarMenu className="space-y-2">
                                 {items.map((item) => (
                                     <SidebarMenuItem key={item.title}>
                                         <SidebarMenuButton asChild className="text-lg text-[#5E6E82] hover:text-[#0186D6] focus:text-[#0186D6] active:text-[#317098] font-medium">

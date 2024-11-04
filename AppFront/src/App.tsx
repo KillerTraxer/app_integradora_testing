@@ -8,6 +8,8 @@ import VerifyAccountPage from './pages/VerifyAccountPage'
 import Home from "@/pages/Home";
 import Layout from "@/pages/Layout"
 import { ToastContainer, Bounce } from 'react-toastify';
+import PrivateRoute from '@/routes/PrivateRoute';
+import PublicRoute from "@/routes/PublicRoute";
 
 function App() {
 
@@ -17,13 +19,13 @@ function App() {
       <Routes>
         {/* ROUTES WITHOUT SIDEBAR */}
         <Route path='/' element={<LandingPage />} />
-        <Route path='/login' element={<LoginPage />} />
-        <Route path='/register' element={<RegisterPage />} />
-        <Route path='/schedule' element={<SchedulePage />} />
-        <Route path='/verifyacc' element={<VerifyAccountPage />} />
+        <Route path='/login' element={<PublicRoute><LoginPage /></PublicRoute>} />
+        <Route path='/register' element={<PublicRoute><RegisterPage /></PublicRoute>} />
+        <Route path='/schedule' element={<PublicRoute><SchedulePage /></PublicRoute>} />
+        <Route path='/verifyacc' element={<PublicRoute><VerifyAccountPage /></PublicRoute>} />
 
         {/* ROUTES WITH SIDEBAR */}
-        <Route path='/home' element={<Layout><Home /></Layout>} />
+        <Route path='/home' element={<PrivateRoute><Layout><Home /></Layout></PrivateRoute>} />
       </Routes>
     </Router>
   )

@@ -15,8 +15,37 @@ const citasSchema = mongoose.Schema({
         type: String,
         require: true,
         trim: true
+    },
+    // paciente: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: 'Paciente',
+    //     require: true
+    // },
+    dentista: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Dentista',
+        require: true
+    },
+    name: {
+        type: String,
+        require: false
+    },
+    apellidos: {
+        type: String,
+        require: false
+    },
+    email: {
+        type: String,
+        require: false
+    },
+    telefono: {
+        type: String,
+        require: false
+    },
+    motivo: {
+        type: String,
+        require: false
     }
-
 }, {
     timestamps: true
 });
