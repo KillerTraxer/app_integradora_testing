@@ -1,24 +1,31 @@
 import { Dropdown, DropdownTrigger, DropdownMenu, DropdownItem, Avatar } from "@nextui-org/react";
 import { Settings, CalendarRange, LogOut, Sun, SunMoon } from "lucide-react"
 import { motion } from "framer-motion"
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import NotificationsComponent from "./NotificationsComponent";
+import useAuthStore from "@/store/authStore";
+// import { useNavigate } from "react-router-dom";
 
 export default function HeaderComponent() {
-    const [dark, setDark] = useState(() => localStorage.getItem("theme") === "dark");
+    const { auth, clearAuth, theme, setTheme } = useAuthStore();
+    // const navigate = useNavigate();
 
     const handleIconClick = () => {
-        const newTheme = dark ? "light" : "dark";
-        setDark(!dark);
-        localStorage.setItem("theme", newTheme);
-        document.documentElement.classList.toggle("dark", !dark);
+        const newTheme = auth?.user.theme === 'light' ? 'dark' : 'light';
+        setTheme(newTheme);
     };
 
     useEffect(() => {
-        const currentTheme = localStorage.getItem("theme") || "light";
-        document.documentElement.classList.toggle("dark", currentTheme === "dark");
-        setDark(currentTheme === "dark");
-    }, []);
+        document.documentElement.classList.toggle("dark", theme === "dark");
+    }, [theme]);
+
+    const handleLogout = () => {
+        clearAuth();
+        //Redirect to login but don't refresh the page
+        // navigate('/login');
+        //Redirect to login and refresh the page
+        window.location.replace('/login');
+    };
 
     return (
         <motion.div
@@ -33,9 +40,9 @@ export default function HeaderComponent() {
                         initial={{ scale: 1 }}
                         animate={{ scale: [1, 1.2, 0.9, 1] }}
                         transition={{ duration: 0.5 }}
-                        key={dark ? "dark" : "light"}
+                        key={theme}
                     >
-                        {dark ? (
+                        {theme === 'dark' ? (
                             <Sun style={{ width: '24px', height: '24px' }} className="cursor-pointer color-icons hover:text-[#0186D6] focus:text-[#0186D6] active:text-[#317098]" />
                         ) : (
                             <SunMoon style={{ width: '24px', height: '24px' }} className="cursor-pointer color-icons hover:text-[#0186D6] focus:text-[#0186D6] active:text-[#317098]" />
@@ -61,7 +68,7 @@ export default function HeaderComponent() {
                     <DropdownMenu aria-label="Profile Actions" variant="shadow" >
                         <DropdownItem key="profile" className="h-14 gap-2">
                             <p className="font-semibold">Hola!</p>
-                            <p className="font-semibold">zoey@example.com</p>
+                            <p className="font-semibold">{auth?.user.nombre}</p>
                         </DropdownItem>
                         <DropdownItem
                             key="settings"
@@ -79,8 +86,9 @@ export default function HeaderComponent() {
                             key="logout"
                             color="danger"
                             startContent={<LogOut size={20} strokeWidth={1.5} />}
+                            onClick={() => handleLogout()}
                         >
-                            Log Out
+                            Salir
                         </DropdownItem>
                     </DropdownMenu>
                 </Dropdown>

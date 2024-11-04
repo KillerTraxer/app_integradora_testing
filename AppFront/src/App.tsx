@@ -7,11 +7,13 @@ import RegisterPage from './pages/RegisterPage'
 import VerifyAccountPage from './pages/VerifyAccountPage'
 import Home from "@/pages/Home";
 import Layout from "@/pages/Layout"
+import { ToastContainer, Bounce } from 'react-toastify';
 
 function App() {
 
   return (
     <Router>
+      <ToastContainer stacked autoClose={4000} transition={Bounce}/>
       <Routes>
         {/* ROUTES WITHOUT SIDEBAR */}
         <Route path='/' element={<LandingPage />} />

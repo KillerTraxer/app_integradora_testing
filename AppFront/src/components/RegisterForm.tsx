@@ -1,4 +1,4 @@
-import { Mail, Lock, Phone, User2, Eye, EyeClosed, Users, CheckCircle } from 'lucide-react'
+import { Mail, Lock, Phone, User2, Eye, EyeClosed, Users, CheckCircle, CircleCheck } from 'lucide-react'
 import { Button, Input, Checkbox } from '@nextui-org/react';
 import { useState } from 'react';
 import React from "react";
@@ -6,6 +6,8 @@ import api from "@/axiosInstance"
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { motion, AnimatePresence } from 'framer-motion'
+import { toast } from 'react-toastify'
+import { useNavigate } from 'react-router-dom'
 
 export default function RegisterForm() {
     const [submitStatus, setSubmitStatus] = useState<string | null>(null)
@@ -16,6 +18,25 @@ export default function RegisterForm() {
     const [loading, setLoading] = useState(false);
     const [duplicateErrors, setDuplicateErrors] = useState([]);
     const [isSuccess, setIsSuccess] = useState(false);
+    const navigate = useNavigate();
+    const [email, setEmail] = useState('');
+
+    const notify = () => {
+        toast.success(
+            <div>
+                <p className='font-semibold text-base'>Cuenta creada con éxito!</p>
+                <p className='font-normal text-sm'>Activa tu cuenta para comenzar a usar el servicio dental.</p>
+            </div>,
+            {
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                theme: "colored",
+                icon: <CircleCheck size={30} />,
+            }
+        );
+    }
 
     const formik = useFormik({
         initialValues: {
@@ -44,6 +65,8 @@ export default function RegisterForm() {
             setLoading(true);
             setDuplicateErrors([]);
             setSubmitStatus(null);
+
+            setEmail(values.email)
 
             try {
                 await api.post('/auth/register', {
@@ -74,8 +97,6 @@ export default function RegisterForm() {
 
         },
     })
-
-    const toggleChecked = () => setChecked(!checked);
 
     const getInputColor = (fieldName: string) => {
         if (focusedField === fieldName) {
@@ -117,7 +138,7 @@ export default function RegisterForm() {
             id={fieldName}
             name={fieldName}
             label={label}
-            placeholder={`Ingresa tu ${label.toLowerCase()}`}
+            placeholder={`${label === 'Contraseña' ? 'Ingresa tu contraseña' : 'Ingresa de nuevo tu contraseña'}`}
             type={isVisible ? "text" : "password"}
             value={formik.values[fieldName as keyof typeof formik.values]}
             onChange={formik.handleChange}
@@ -177,11 +198,11 @@ export default function RegisterForm() {
                 </div>
 
                 <div className='flex flex-row items-center mt-4'>
-                    <Checkbox color='primary' onClick={toggleChecked} />
+                    <Checkbox color='primary' isSelected={checked} onValueChange={setChecked} />
                     <p className="font-extralight text-sm ml-1 flex-grow">
                         He leído y acepto los{' '}
                         <a href="#" className="text-blue-600 hover:underline font-semibold">
-                            Terminos y Condiciones.
+                            Términos y Condiciones.
                         </a>
                     </p>
                 </div>
@@ -216,6 +237,10 @@ export default function RegisterForm() {
                                 animate={{ scale: 1 }}
                                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
                                 className="absolute inset-0 flex items-center justify-center"
+                                onAnimationComplete={() => {
+                                    notify();
+                                    navigate('/verifyacc', { state: { email: email, sendOTP: true } });
+                                }}
                             >
                                 <CheckCircle className="text-white" size={24} />
                             </motion.div>

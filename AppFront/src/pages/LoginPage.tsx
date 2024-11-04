@@ -1,21 +1,10 @@
-import { Mail, Lock, Eye, EyeClosed } from 'lucide-react'
 import Logo from "../assets/clinic_logo.svg";
 import { useNavigate } from 'react-router-dom';
-import { Button, Input } from "@nextui-org/react";
-import { useState } from 'react';
+import { motion } from 'framer-motion'
+import LoginForm from "@/components/LoginForm"
 
 export default function LoginPage() {
     const navigate = useNavigate();
-
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [isVisible, setIsVisible] = useState(false);
-    const [focusState, setFocusState] = useState({
-        email: false,
-        password: false
-    });
-
-    const toggleVisibility = () => setIsVisible(!isVisible);
 
 
     return (
@@ -26,7 +15,15 @@ export default function LoginPage() {
 
             <div className="w-full max-w-3xl bg-white rounded-3xl shadow-xl overflow-hidden z-10">
                 <div className="flex flex-col lg:flex-row">
-                    <div className="lg:w-1/2 pl-12 pt-12 pr-12 pb-8 flex flex-col items-center justify-center relative">
+                    <motion.div
+                        className="lg:w-1/2 pl-12 pt-12 pr-12 pb-8 flex flex-col items-center justify-center relative"
+                        key="logoImg"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        transition={{ duration: 0.3 }}
+                        layout
+                    >
                         <div className="relative z-10 lg:w-48 lg:h-48 w-28 h-28 bg-gray-900 rounded-full flex items-center justify-center">
                             <div className="relative lg:w-48 lg:h-48">
                                 <img
@@ -38,75 +35,22 @@ export default function LoginPage() {
                                 />
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* Login form section (right side on large screens, bottom on small screens) */}
                     <div className="lg:w-1/2 pb-10 pl-8 pr-8 lg:pt-10 lg:pr-20 lg:pl-2">
-                        <div className="max-w-md mx-auto">
-                            <h2 className="text-3xl font-bold text-gray-900 mb-4 text-center lg:text-center">Iniciar Sesión</h2>
+                        <motion.div
+                            className="max-w-md mx-auto"
+                            key="form"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.3 }}
+                            layout
+                        >
+                            <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center lg:text-center">Iniciar Sesión</h2>
 
-                            <form>
-                                <div className="space-y-4">
-                                    <div>
-                                        <Input
-                                            value={email}
-                                            id='email'
-                                            label="Email"
-                                            labelPlacement='inside'
-                                            type='email'
-                                            className={`w-full ${focusState.email ? "text-primary" : "text-black"}`}
-                                            size='lg'
-                                            placeholder='johndoe@gmail.com'
-                                            startContent={
-                                                <Mail className={`${focusState.email ? "text-primary" : "text-gray-400"} mb-0.5`} size={18} />
-                                            }
-                                            onValueChange={setEmail}
-                                            color={focusState.email ? "primary" : "default"}
-                                            onFocus={() => setFocusState(prev => ({ ...prev, email: true }))}
-                                            onBlur={() => setFocusState(prev => ({ ...prev, email: false }))}
-                                        />
-                                    </div>
-
-                                    <div>
-                                        <Input
-                                            value={password}
-                                            id='password'
-                                            type={isVisible ? 'text' : 'password'}
-                                            className={`w-full ${focusState.password ? "text-primary" : "text-black"}`}
-                                            label="Contraseña"
-                                            labelPlacement='inside'
-                                            size='lg'
-                                            placeholder='Escribe tu contraseña'
-                                            startContent={
-                                                <Lock className={`${focusState.password ? "text-primary" : "text-gray-400"} mb-1`} size={18} />
-                                            }
-                                            endContent={
-                                                <button className="focus:outline-none" type="button" onClick={toggleVisibility} aria-label="toggle password visibility">
-                                                    {isVisible ? (
-                                                        <EyeClosed className={`${focusState.password ? "text-primary" : "text-gray-400"}`} size={18} />
-                                                    ) : (
-                                                        <Eye className={`${focusState.password ? "text-primary" : "text-gray-400"}`} size={18} />
-                                                    )}
-                                                </button>
-                                            }
-                                            color={focusState.password ? "primary" : "default"}
-                                            onValueChange={setPassword}
-                                            onFocus={() => setFocusState(prev => ({ ...prev, password: true }))}
-                                            onBlur={() => setFocusState(prev => ({ ...prev, password: false }))}
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="mt-4 text-right">
-                                    <a href="/forgot-password" className="text-sm font-semibold text-blue-600 hover:underline">
-                                        Olvidaste tu contraseña?
-                                    </a>
-                                </div>
-
-                                <Button type="submit" className="w-full p-2 mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-base">
-                                    Ingresar
-                                </Button>
-                            </form>
+                            <LoginForm />
 
                             <div className="mt-8 text-center">
                                 <p className="text-sm text-gray-600 font-semibold">
@@ -116,7 +60,7 @@ export default function LoginPage() {
                                     </a>
                                 </p>
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
                 </div>
             </div>

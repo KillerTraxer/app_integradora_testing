@@ -2,8 +2,11 @@ import { Card, CardHeader, CardBody } from "@nextui-org/react";
 import Chart from "react-apexcharts";
 import { CalendarClock, UsersRound } from "lucide-react"
 import ListOfAppointments from "@/components/ListofAppointments"
+import useAuthStore  from '@/store/authStore';
 
 export default function Home() {
+    const { auth } = useAuthStore();
+
     const chartOptions = {
         chart: {
             id: 'basic-line'
@@ -59,7 +62,7 @@ export default function Home() {
                 {/* Tarjeta con gráfica */}
                 <Card className="card-bg md:col-span-2">
                     <CardHeader className="ml-4 mt-2">
-                        <h1 className="font-semibold text-sm">Citas por mes</h1>
+                        <h1 className="font-semibold text-sm">{auth?.user.nombre}</h1>
                     </CardHeader>
                     <CardBody className="h-[300px] overflow-hidden">
                         <Chart

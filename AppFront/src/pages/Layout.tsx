@@ -7,10 +7,6 @@ import { motion } from 'framer-motion';
 export default function Layout({ children }: { children: React.ReactNode }) {
     const [open, setOpen] = useState(true)
 
-    console.log(open);
-
-
-
     return (
         <SidebarProvider open={open} onOpenChange={setOpen} defaultOpen={open}>
             <AppSidebar />

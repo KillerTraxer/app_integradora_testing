@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import Logo from "../assets/clinic_logo.svg";
 import RegisterForm from "@/components/RegisterForm"
+import { motion } from 'framer-motion'
 
 export default function RegisterPage() {
     const navigate = useNavigate();
@@ -13,7 +14,15 @@ export default function RegisterPage() {
 
             <div className="w-full max-w-3xl bg-white rounded-3xl shadow-xl overflow-hidden z-10">
                 <div className="flex flex-col lg:flex-row">
-                    <div className="lg:w-1/2 pl-12 pt-12 pr-12 pb-8 flex flex-col items-center justify-center relative">
+                    <motion.div
+                        className="lg:w-1/2 pl-12 pt-12 pr-12 pb-8 flex flex-col items-center justify-center relative"
+                        key="logoImg"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        transition={{ duration: 0.3 }}
+                        layout
+                    >
                         <div className="relative z-10 lg:w-48 lg:h-48 w-28 h-28 bg-gray-900 rounded-full flex items-center justify-center">
                             <div className="relative lg:w-48 lg:h-48">
                                 <img
@@ -25,15 +34,23 @@ export default function RegisterPage() {
                                 />
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
 
-                    <div className="lg:w-1/2 pb-10 pl-8 pr-8 lg:pt-10 lg:pr-20 lg:pl-2">
-                        <div className="max-w-md mx-auto">
-                            <h2 className={`mb-8 text-3xl font-bold text-gray-900 text-center lg:text-center`}>Registro</h2>
+                    <div className="lg:w-1/2 pb-2 pl-8 pr-8 lg:pt-5 lg:pr-20 lg:pl-2">
+                        <motion.div
+                            className="max-w-md mx-auto"
+                            key="form"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.3 }}
+                            layout
+                        >
+                            <h2 className={`mb-6 text-3xl font-bold text-gray-900 text-center lg:text-center`}>Registro</h2>
 
                             <RegisterForm />
 
-                            <div className="mt-8 text-center">
+                            <div className="mt-3 mb-3 text-center">
                                 <p className="text-sm text-gray-600 font-semibold">
                                     Ya tienes cuenta?{' '}
                                     <a href="/login" className="text-blue-600 hover:underline font-semibold">
@@ -41,7 +58,7 @@ export default function RegisterPage() {
                                     </a>
                                 </p>
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
                 </div>
             </div>

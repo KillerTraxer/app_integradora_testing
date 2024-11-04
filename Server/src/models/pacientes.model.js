@@ -17,7 +17,7 @@ const pacienteSchema = new mongoose.Schema({
         trim: true,
         unique: true,
     },
-    email : {
+    email: {
         type: String,
         require: true,
         trim: true,
@@ -27,9 +27,28 @@ const pacienteSchema = new mongoose.Schema({
         type: String,
         require: true,
         trim: true
+    },
+    otpSecret: {
+        type: String,
+        require: false,
+    },
+    otpExpiry: {
+        type: Date,
+        require: false,
+    },
+    verified: {
+        type: Boolean,
+        default: false
+    },
+    rol: {
+        type: String,
+        default: "paciente"
+    },
+    refreshToken: {
+        type: String,
+        required: false,
     }
-
-},{
+}, {
     timestamps: true
 })
 
