@@ -28,8 +28,6 @@ export default function SchedulePage() {
         });
     };
 
-    console.log(isSuccess);
-
     return (
         <div className="min-h-screen bg-blue-600 flex items-center justify-center p-4 relative overflow-hidden">
             <div className="absolute top-0 left-0 w-32 h-32 bg-blue-400 rounded-full -translate-x-1/2 -translate-y-1/3"></div>
@@ -44,7 +42,7 @@ export default function SchedulePage() {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20 }}
-                        transition={{ duration: 0.3 }}
+                        transition={{ duration: 1, delay: 0.2 }}
                         layout
                     >
                         <div className="relative z-10 lg:w-48 lg:h-48 w-28 h-28 bg-gray-900 rounded-full flex items-center justify-center">
@@ -69,7 +67,7 @@ export default function SchedulePage() {
                                         initial={{ opacity: 0, x: 20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, x: -20 }}
-                                        transition={{ duration: 0.3 }}
+                                        transition={{ duration: 1 }}
                                         layout
                                     >
                                         <h2 className={`mb-4 text-3xl font-bold text-gray-900 text-center lg:text-center`}>Agendar cita</h2>
@@ -98,7 +96,7 @@ export default function SchedulePage() {
                                         initial={{ opacity: 0, x: 20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, x: -20 }}
-                                        transition={{ duration: 0.3 }}
+                                        transition={{ duration: 1 }}
                                         layout
                                         onAnimationComplete={() => showConfetti()}
                                     >

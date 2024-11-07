@@ -140,7 +140,7 @@ export default function VerifyAccountPage() {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: 20 }}
-                        transition={{ duration: 0.3 }}
+                        transition={{ duration: 1 }}
                         layout
                     >
                         <div className="relative z-10 lg:w-48 lg:h-48 w-28 h-28 bg-gray-900 rounded-full flex items-center justify-center">
@@ -166,7 +166,7 @@ export default function VerifyAccountPage() {
                                         initial={{ opacity: 0, x: 20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, x: -20 }}
-                                        transition={{ duration: 0.3 }}
+                                        transition={{ duration: 1 }}
                                         layout
                                     >
                                         <h2 className="text-3xl font-bold text-gray-900 mb-4 text-center">Activar cuenta</h2>
@@ -235,7 +235,7 @@ export default function VerifyAccountPage() {
                                         initial={{ opacity: 0, x: 20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, x: -20 }}
-                                        transition={{ duration: 0.3 }}
+                                        transition={{ duration: 1 }}
                                         layout
                                         onAnimationComplete={() => showConfetti()}
                                     >
