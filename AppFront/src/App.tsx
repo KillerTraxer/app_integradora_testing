@@ -10,12 +10,20 @@ import Layout from "@/pages/Layout"
 import { ToastContainer, Bounce } from 'react-toastify';
 import PrivateRoute from '@/routes/PrivateRoute';
 import PublicRoute from "@/routes/PublicRoute";
+import { useEffect } from 'react';
+import ConfigPage from './pages/ConfigPage'
 
+//! REGISTRO DE SERVICE WORKER
 function App() {
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js');
+    }
+  }, []);
 
   return (
     <Router>
-      <ToastContainer stacked autoClose={4000} transition={Bounce}/>
+      <ToastContainer stacked autoClose={4000} transition={Bounce} />
       <Routes>
         {/* ROUTES WITHOUT SIDEBAR */}
         <Route path='/' element={<LandingPage />} />
@@ -26,6 +34,7 @@ function App() {
 
         {/* ROUTES WITH SIDEBAR */}
         <Route path='/home' element={<PrivateRoute><Layout><Home /></Layout></PrivateRoute>} />
+        <Route path='/configuracion' element={<Layout><ConfigPage /></Layout>} />
       </Routes>
     </Router>
   )

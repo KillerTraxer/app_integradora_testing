@@ -4,11 +4,11 @@ import { motion } from "framer-motion"
 import { useEffect } from "react";
 import NotificationsComponent from "./NotificationsComponent";
 import useAuthStore from "@/store/authStore";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function HeaderComponent() {
     const { auth, clearAuth, theme, setTheme } = useAuthStore();
-    // const navigate = useNavigate();
+    const navigate = useNavigate();
 
     const handleIconClick = () => {
         const newTheme = auth?.user.theme === 'light' ? 'dark' : 'light';
@@ -62,7 +62,8 @@ export default function HeaderComponent() {
                             isBordered
                             as="button"
                             className="transition-transform"
-                            src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
+                            src=""
+                            showFallback
                         />
                     </DropdownTrigger>
                     <DropdownMenu aria-label="Profile Actions" variant="shadow" >
@@ -73,6 +74,7 @@ export default function HeaderComponent() {
                         <DropdownItem
                             key="settings"
                             startContent={<Settings size={20} strokeWidth={1.5} />}
+                            onClick={() => navigate('/configuracion')}
                         >
                             Configuracion
                         </DropdownItem>

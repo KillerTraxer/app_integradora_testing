@@ -15,5 +15,5 @@ createRoot(document.getElementById('root')!).render(
         <App />
       </NextUIProvider>
     </QueryClientProvider>
-  </StrictMode>,
+  </StrictMode>
 )

@@ -38,7 +38,7 @@ export default function Home() {
     ]
 
     return (
-        <div className="lg:pl-6 lg:pr-3 md:pl-6 md:pr-3 pt-3 pl-4 pr-3">
+        <div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {cardsInfo.map((item, index) => (
                     <Card key={index} className="card-bg pt-4 pb-4 pl-5 pr-5 flex flex-row justify-between items-center">
@@ -62,7 +62,7 @@ export default function Home() {
                 {/* Tarjeta con gráfica */}
                 <Card className="card-bg md:col-span-2">
                     <CardHeader className="ml-4 mt-2">
-                        <h1 className="font-semibold text-sm">{auth?.user.nombre}</h1>
+                        <h1 className="font-semibold text-sm">Gráfica de citas por mes</h1>
                     </CardHeader>
                     <CardBody className="h-[300px] overflow-hidden">
                         <Chart

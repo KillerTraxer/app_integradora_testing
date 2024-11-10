@@ -21,8 +21,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
             <HeaderComponent />
 
-            <main className="h-[100vh] w-full pt-16 mr-3">
-                {children}
+            <main className="h-[100vh] w-full pt-16 mr-3 mb-auto">
+                <div className="lg:pl-6 lg:pr-3 md:pl-6 md:pr-3 pt-3 pl-4 pr-3">
+                    {children}
+                </div>
             </main>
         </SidebarProvider>
     )
