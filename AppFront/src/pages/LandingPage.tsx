@@ -34,13 +34,11 @@ const team = [
 
 const locations = [
     { name: 'Clínica Central', address: 'Av. Principal 123, Ciudad' },
-    //{ name: 'Sucursal Norte', address: 'Calle 45 #67-89, Zona Norte' },
 ]
 
 export default function LandingPage() {
     const [isSticky, setIsSticky] = useState(false)
     const [isMenuOpen, setIsMenuOpen] = useState(false)
-    const [animatedSections, setAnimatedSections] = useState<string[]>([])
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -53,43 +51,6 @@ export default function LandingPage() {
         return () => {
             window.removeEventListener('scroll', handleScroll);
         };
-    }, []);
-
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        const section = entry.target.id;
-                        if (!animatedSections.includes(section)) {
-                            setAnimatedSections((prev) => [...prev, section]);
-                        }
-                    }
-                });
-            },
-            { threshold: 0.1 }
-        );
-
-        const sections = ['hero', 'services', 'team', 'location', 'cta'];
-        sections.forEach((section) => {
-            const element = document.getElementById(section);
-            if (element) {
-                observer.observe(element);
-            }
-        });
-
-        return () => {
-            sections.forEach((section) => {
-                const element = document.getElementById(section);
-                if (element) {
-                    observer.unobserve(element);
-                }
-            });
-        };
-    }, [animatedSections]);
-
-    useEffect(() => {
-        setAnimatedSections(['hero'])
     }, []);
 
     const navItems = [
@@ -114,11 +75,34 @@ export default function LandingPage() {
         }
     };
 
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.2,
+            },
+        },
+    }
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                type: "spring",
+                bounce: 0.4,
+                duration: 0.8,
+            },
+        },
+    }
+
     return (
         <div className="min-h-screen bg-white">
             <header className={`fixed w-full z-50 transition-all ${isSticky ? 'bg-white shadow-md' : 'bg-transparent'}`}>
                 <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                    <motion.div 
+                    <motion.div
                         className="flex items-center justify-between h-20"
                         initial={{ opacity: 0, y: -100 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -160,7 +144,7 @@ export default function LandingPage() {
             )}
 
             <main>
-                <section id="hero" className={`relative min-h-screen flex items-center transition-opacity duration-1000 ${animatedSections.includes('hero') ? 'opacity-100' : 'opacity-0'}`}>
+                <section id="hero" className={`relative min-h-screen flex items-center`}>
                     <motion.div
                         className="absolute inset-0 z-0"
                         initial={{ opacity: 0, x: 100 }}
@@ -205,114 +189,138 @@ export default function LandingPage() {
 
                 <section id="services" className="py-24 bg-white">
                     <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="text-center mb-12">
-                            <h3 className={`text-blue-600 text-lg font-semibold mb-4 transition-all duration-1000 transform ${animatedSections.includes('services') ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0'
-                                }`}>
+                        <motion.div
+                            initial="hidden"
+                            whileInView={"visible"}
+                            viewport={{ once: true, amount: 0.1 }}
+                            variants={containerVariants}
+                            className="text-center mb-12"
+                        >
+                            <motion.h3 variants={itemVariants} className="text-blue-600 text-lg font-semibold mb-4">
                                 SERVICIOS
-                            </h3>
-                            <h2 className={`text-4xl md:text-5xl font-bold text-blue-900 mb-4 transition-all duration-1000 transform ${animatedSections.includes('services') ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0'
-                                }`} style={{ transitionDelay: '200ms' }}>
+                            </motion.h3>
+                            <motion.h2 variants={itemVariants} className="text-4xl md:text-5xl font-bold text-blue-900 mb-4">
                                 Servicios generales en<br />Cio Dental
-                            </h2>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            </motion.h2>
+                        </motion.div>
+
+                        <motion.div
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true, amount: 0.1 }}
+                            variants={containerVariants}
+                            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+                        >
                             {services.map((service, index) => (
-                                <div
-                                    key={index}
-                                    className={`text-center transition-all duration-1000 transform ${animatedSections.includes('services')
-                                        ? 'translate-y-0 opacity-100'
-                                        : 'translate-y-16 opacity-0'
-                                        }`}
-                                    style={{ transitionDelay: `${(index + 2) * 200}ms` }}
-                                >
+                                <motion.div key={index} variants={itemVariants} className="text-center">
                                     <div className="flex justify-center mb-4">
-                                        <img src={service.icon} width={75} height={75} className="text-blue-600" />
+                                        <img src={service.icon} width={75} height={75} alt={service.name} className="text-blue-600" />
                                     </div>
                                     <h3 className="text-xl font-bold text-blue-900 mb-2">{service.name}</h3>
                                     <p className="text-gray-600 font-semibold">{service.description}</p>
-                                </div>
+                                </motion.div>
                             ))}
-                        </div>
+                        </motion.div>
                     </div>
                 </section>
 
                 <section id="team" className="py-16 bg-white">
                     <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="text-center mb-12">
-                            <h3 className={`text-blue-600 text-lg font-semibold mb-4 transition-all duration-1000 transform ${animatedSections.includes('team') ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0'
-                                }`}>
+                        <motion.div
+                            initial="hidden"
+                            whileInView={"visible"}
+                            viewport={{ once: true, amount: 0.1 }}
+                            variants={containerVariants}
+                            className="text-center mb-12"
+                        >
+                            <motion.h3 variants={itemVariants} className="text-blue-600 text-lg font-semibold mb-4">
                                 NUESTRO EQUIPO
-                            </h3>
-                            <h2 className={`text-4xl md:text-5xl font-bold text-blue-900 mb-4 transition-all duration-1000 transform ${animatedSections.includes('team') ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0'
-                                }`} style={{ transitionDelay: '200ms' }}>
+                            </motion.h3>
+                            <motion.h2 variants={itemVariants} className="text-4xl md:text-5xl font-bold text-blue-900 mb-4">
                                 Profesionales expertos<br />a tu servicio
-                            </h2>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            </motion.h2>
+                        </motion.div>
+
+                        <motion.div
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true, amount: 0.1 }}
+                            variants={containerVariants}
+                            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+                        >
                             {team.map((member, index) => (
-                                <div
+                                <motion.div
                                     key={index}
-                                    className={`bg-white rounded-lg p-6 shadow-md text-center transition-all duration-1000 transform ${animatedSections.includes('team')
-                                        ? 'translate-y-0 opacity-100'
-                                        : 'translate-y-16 opacity-0'
-                                        }`}
-                                    style={{ transitionDelay: `${(index + 2) * 200}ms` }}
+                                    className={`bg-white rounded-lg p-6 shadow-md text-center`}
+                                    variants={itemVariants}
                                 >
                                     <div className="w-32 h-32 bg-blue-200 rounded-full mx-auto mb-4 flex items-center justify-center">
                                         <Users size={48} className="text-blue-600" />
                                     </div>
                                     <h3 className="text-xl font-bold text-blue-900 mb-2">{member.name}</h3>
                                     <p className="text-gray-600">{member.role}</p>
-                                </div>
+                                </motion.div>
                             ))}
-                        </div>
+                        </motion.div>
                     </div>
                 </section>
 
                 <section id="location" className="py-16 bg-white">
                     <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="text-center mb-12">
-                            <h3 className={`text-blue-600 text-lg font-semibold mb-4 transition-all duration-1000 transform ${animatedSections.includes('location') ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0'
-                                }`}>
+                        <motion.div
+                            initial="hidden"
+                            whileInView={"visible"}
+                            viewport={{ once: true, amount: 0.1 }}
+                            variants={containerVariants}
+                            className="text-center mb-12"
+                        >
+                            <motion.h3 variants={itemVariants} className="text-blue-600 text-lg font-semibold mb-4">
                                 UBICACIONES
-                            </h3>
-                            <h2 className={`text-4xl md:text-5xl font-bold text-blue-900 mb-4 transition-all duration-1000 transform ${animatedSections.includes('location') ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0'
-                                }`} style={{ transitionDelay: '200ms' }}>
+                            </motion.h3>
+                            <motion.h2 variants={itemVariants} className="text-4xl md:text-5xl font-bold text-blue-900 mb-4">
                                 Encuentra tu clínica<br />más cercana
-                            </h2>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-1 gap-8">
+                            </motion.h2>
+                        </motion.div>
+
+                        <motion.div
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true, amount: 0.1 }}
+                            variants={containerVariants}
+                            className="grid grid-cols-1 md:grid-cols-1 gap-8"
+                        >
                             {locations.map((location, index) => (
-                                <div
+                                <motion.div
                                     key={index}
-                                    className={`bg-gray-50 rounded-lg p-6 shadow-md flex items-start transition-all duration-1000 transform ${animatedSections.includes('location')
-                                        ? 'translate-y-0 opacity-100'
-                                        : 'translate-y-16 opacity-0'
-                                        }`}
-                                    style={{ transitionDelay: `${(index + 2) * 200}ms` }}
+                                    className={`bg-gray-50 rounded-lg p-6 shadow-md flex items-start`}
+                                    variants={itemVariants}
                                 >
                                     <MapPinned size={48} className="text-blue-600 mr-4 flex-shrink-0" />
                                     <div>
                                         <h3 className="text-xl font-semibold text-blue-900 mb-2">{location.name}</h3>
                                         <p className="text-gray-600">{location.address}</p>
                                     </div>
-                                </div>
+                                </motion.div>
                             ))}
-                        </div>
+                        </motion.div>
                     </div>
                 </section>
 
-                <section id="cta" className={`py-16 bg-blue-600 transition-opacity duration-1000 ${animatedSections.includes('cta') ? 'opacity-100' : 'opacity-0'}`}>
-                    <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                        <h2 className={`text-3xl font-bold text-white mb-8 transition-all duration-1000 transform ${animatedSections.includes('cta') ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0'
-                            }`}>
+                <section id="cta" className={`py-16 bg-blue-600`}>
+                    <motion.div
+                        initial="hidden"
+                        whileInView={"visible"}
+                        viewport={{ once: true, amount: 0.1 }}
+                        variants={containerVariants}
+                        className="container mx-auto px-4 sm:px-6 lg:px-8 text-center"
+                    >
+                        <motion.h2 className={`text-3xl font-bold text-white mb-8`} variants={itemVariants}>
                             ¿Listo para mejorar tu sonrisa?
-                        </h2>
-                        <button className={`bg-white text-blue-600 hover:bg-blue-100 px-8 py-3 rounded-full text-lg font-semibold transition-all duration-1000 transform ${animatedSections.includes('cta') ? 'translate-y-0 opacity-100' : 'translate-y-16 opacity-0'
-                            }`} style={{ transitionDelay: '200ms' }} onClick={() => navigate('/schedule')}>
+                        </motion.h2>
+                        <motion.button variants={itemVariants} className={`bg-white text-blue-600 hover:bg-blue-100 px-8 py-3 rounded-full text-lg font-semibold`} onClick={() => navigate('/schedule')}>
                             Agendar cita
-                        </button>
-                    </div>
+                        </motion.button>
+                    </motion.div>
                 </section>
             </main>
 

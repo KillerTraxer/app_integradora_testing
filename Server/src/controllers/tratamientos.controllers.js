@@ -42,10 +42,10 @@ export const putTratamiento = async (req, res) => {
         const tratamiento = await Tratamiento.findByIdAndUpdate(req.params.id, req.body, {
             new: true
         });
-        res.json({"message": "Realizado correctamente"});
 
         if(tratamiento == null) return res.json({"message":"No encontrado"});
 
+        res.json({"message": "Realizado correctamente"});
     } catch (error) {
         console.log(error);
     }

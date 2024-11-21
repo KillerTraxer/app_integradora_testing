@@ -1,50 +1,34 @@
 import mongoose from "mongoose";
 
 const citasSchema = mongoose.Schema({
-    asunto: {
-        type: String,
-        require: true,
-        trim: true
+    paciente: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'pacientes',
+        require: true
+    },
+    dentista: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'dentistas',
+        require: true
     },
     fecha: {
         type: Date,
         require: true,
         trim: true
     },
-    descripcion: {
-        type: String,
-        require: true,
-        trim: true
-    },
-    // paciente: {
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'Paciente',
-    //     require: true
-    // },
-    dentista: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Dentista',
-        require: true
-    },
-    name: {
-        type: String,
-        require: false
-    },
-    apellidos: {
-        type: String,
-        require: false
-    },
-    email: {
-        type: String,
-        require: false
-    },
-    telefono: {
-        type: String,
-        require: false
-    },
     motivo: {
         type: String,
         require: false
+    },
+    status: {
+        type: String,
+        require: true,
+        enum: ['confirmada', 'cancelada', 'realizada', 'sin realizar'],
+        default: 'confirmada'
+    },
+    colorCita: {
+        type: String,
+        require: true
     }
 }, {
     timestamps: true

@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 
-const dentistaSchema = mongoose.Schema({
+const dentistaSchema = new mongoose.Schema({
     nombre: {
         type: String,
         require: true,
         trim: true
     },
-    apellido: {
+    apellidos: {
         type: String,
         require: true,
         trim: true

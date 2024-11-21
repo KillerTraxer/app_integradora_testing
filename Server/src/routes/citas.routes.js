@@ -1,5 +1,5 @@
 import Router from "express";
-import {getCitas, getCita, postCita, putCita, deleteCita, postCitaPublic} from "../controllers/citas.controllers.js";
+import {getCitas, getCita, getCitasByPaciente, postCita, putCita, deleteCita, countCitas} from "../controllers/citas.controllers.js";
 import authenticateToken from "../middleware/authenticateToken.js";
 
 const router = Router();
@@ -7,13 +7,12 @@ const router = Router();
 //Rutas protegidas por token
 router.use(authenticateToken);
 
+router.get("/count", countCitas)
 router.get("/", getCitas);
 router.get("/:id", getCita);
-router.post("/", postCita);
+router.get("/paciente/:pacienteId", getCitasByPaciente);
+router.post("/:pacienteId", postCita);
 router.put("/:id", putCita);
 router.delete("/:id", deleteCita);
-
-// Ruta pública para hacer citas sin token
-router.post("/public", postCitaPublic);
 
 export default router;

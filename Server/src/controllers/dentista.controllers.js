@@ -3,9 +3,9 @@ import Dentista from "../models/dentista.model.js";
 export const getDentistas = async (req, res) => {
     try {
         const dentistas = await Dentista.find();
-        res.json(dentistas);
-
         if(!dentistas) return res.json({"message": "No hay dentistas"});
+
+        res.json(dentistas);
 
     } catch (error) {
         console.log(error);
@@ -16,9 +16,9 @@ export const getDentistas = async (req, res) => {
 export const getDentista = async (req, res) => {
     try {
         const dentista = await Dentista.findById(req.params.id);
-        res.json(dentista);
-
         if(!dentista) return res.json({"message": "Dentista no encontrado"});
+
+        res.json(dentista);
 
     } catch (error) {
         console.log(error);
@@ -50,12 +50,9 @@ export const putDentista = async (req, res) => {
         const dentista = await Dentista.findByIdAndUpdate(req.params.id, req.body, {
             new: true
         })
-
-        res.json({"message": "Realizado con exito"});
-
         if(!dentista) return res.json({"message": "No existe el dentista"});
 
-
+        res.json({"message": "Realizado con exito"});
     } catch (error) {
         console.log(error);
     }
@@ -65,11 +62,10 @@ export const deleteDentista = async (req, res) => {
     try {
         const dentista = await Dentista.findByIdAndDelete(req.params.id, req.body, {
             new: true
-        })
-
-        res.json({"message": "Realizado con exito"});
+        });
         if(!dentista) return res.json({"message": "No existe el dentista"});
 
+        res.json({"message": "Realizado con exito"});
     } catch (error) {
         console.log(error);
     }

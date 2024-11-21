@@ -47,6 +47,11 @@ const pacienteSchema = new mongoose.Schema({
     refreshToken: {
         type: String,
         required: false,
+    },
+    status: {
+        type: String,
+        enum: ['sin tratamiento', 'en tratamiento', 'finalizado'],
+        default: 'sin tratamiento'
     }
 }, {
     timestamps: true

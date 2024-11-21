@@ -4,7 +4,6 @@ import { Edit2 } from "lucide-react";
 import useAuthStore from "@/store/authStore";
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
-import api from "@/axiosInstance"
 
 const validationSchema = Yup.object().shape({
     name: Yup.string().required('El nombre no puede estar vació'),
@@ -114,7 +113,7 @@ export default function EditInfoForm() {
                                     onFocus={() => setFocusedField(field)}
                                 />
                                 <div>
-                                    <Button color="primary" type="submit" disabled={formik.isSubmitting}>
+                                    <Button color="primary" variant="flat" type="submit" disabled={formik.isSubmitting}>
                                         {formik.isSubmitting ? 'Guardando...' : 'Guardar cambios'}
                                     </Button>
                                 </div>

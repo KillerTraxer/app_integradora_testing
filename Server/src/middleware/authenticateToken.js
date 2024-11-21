@@ -13,7 +13,13 @@ const authenticateToken = (req, res, next) => {
     if (!token) return res.sendStatus(401); // No autorizado
 
     jwt.verify(token, secretKey, (err, user) => {
-        if (err) return res.sendStatus(403); // Prohibido
+        if (err) {
+            if (err.name === 'TokenExpiredError') {
+                return res.status(401).send({ message: 'El token ha expirado' });
+            } else {
+                return res.sendStatus(403); // Prohibido
+            }
+        }
         req.user = user;
         next();
     });

@@ -4,13 +4,16 @@
 
 body {
   margin: 0;
+  padding: 0;
   min-height: 100vh;
 }
 
-/* :root {
-  background-color: var(--background-color);
+:root {
+  margin: 0;
+  padding: 0;
+  background-color: var(--background);
   color: var(--text-color);
-} */
+}
 
 .color-icons {
   color: var(--icon-color);
@@ -21,16 +24,16 @@ body {
 }
 
 .card-bg h1 {
-  color: var(--card-title)
+  color: var(--card-title);
 }
 
 .card-bg p {
-  color: var(--card-text)
+  color: var(--card-text);
 }
 
 .input-otp-slot:focus {
   outline: none;
-  box-shadow: 0 0 0 2px #1D4ED8;
+  box-shadow: 0 0 0 2px #1d4ed8;
   /* Color azul */
 }
 
@@ -43,10 +46,57 @@ body {
 .divider::before,
 .divider::after {
   flex: 1;
-  content: '';
+  content: "";
   padding: 3px;
   background-color: red;
   margin: 5px;
+}
+
+.input-date-bg {
+  background-color: #f4f4f5;
+}
+
+.input-date-label {
+  color: #6a6a72;
+}
+
+.input-date-bg:hover {
+  background-color: #e4e4e7;
+}
+
+.dark .input-date-bg {
+  background-color: #27272a;
+}
+
+.dark .input-date-label {
+  color: #aaaaaf;
+}
+
+.dark .input-date-bg:hover {
+  background-color: #3f3f46;
+}
+
+.date-picker-popup {
+  z-index: 1400 !important;
+}
+.ant-picker-dropdown {
+  position: fixed !important;
+}
+.ant-picker-panel-container {
+  overflow: visible !important;
+}
+
+.ant-picker-dropdown {
+  @media (max-width: 768px) {
+    inset: 395px auto auto 0px !important;
+  }
+}
+.ant-picker-dropdown .ant-picker-panel-container {
+  @media (max-width: 768px) {
+    max-width: 100vw !important;
+    overflow: auto !important;
+    inset: 395px auto auto 0px !important;
+  }
 }
 
 .ant-picker .ant-picker-input span.ant-picker-suffix {
@@ -65,7 +115,7 @@ body {
   font-size: 14px;
 }
 
-.ant-picker .ant-picker-input>input::placeholder {
+.ant-picker .ant-picker-input > input::placeholder {
   color: #808088;
 }
 
@@ -87,4 +137,69 @@ body {
 
 .ant-form-item-label label {
   font-size: 12px;
+}
+
+/** Estilos generales para react-big-calendar */
+.rbc-calendar {
+  @apply bg-white text-black;
+  /* Light mode */
+}
+
+/* Estilos para el modo oscuro */
+.dark .rbc-calendar {
+  @apply bg-[#121e2d] text-white;
+}
+
+/* Ajusta los colores de los eventos */
+.dark .rbc-event {
+  @apply bg-[#0186d6] text-white;
+}
+
+/* Estilos de slots para el modo claro */
+.rbc-time-slot {
+  @apply bg-white border-gray-200;
+}
+
+/* Estilos de slots en el modo oscuro */
+.dark .rbc-time-slot {
+  @apply bg-gray-800 border-gray-800;
+}
+
+/* Slots de día en modo claro */
+.rbc-day-slot {
+  @apply bg-white;
+}
+
+/* Slots de día en modo oscuro */
+.dark .rbc-day-slot {
+  @apply bg-gray-900;
+}
+
+.dark .rbc-day-bg {
+  @apply bg-gray-900;
+}
+
+/* Estilos para días fuera del mes en modo oscuro */
+.dark .rbc-off-range {
+  @apply text-gray-500 bg-gray-800;
+}
+
+/* Estilo para el día actual en modo claro */
+.rbc-today {
+  @apply bg-blue-200;
+}
+
+/* Estilo para el día actual en modo oscuro */
+.dark .rbc-today {
+  @apply bg-[#1f2e88] text-white;
+}
+
+/* Estilo para los botones en modo claro */
+.rbc-toolbar button {
+  @apply bg-white text-black hover:bg-indigo-200;
+}
+
+/* Estilo para los botones en modo oscuro */
+.dark .rbc-toolbar button {
+  @apply bg-gray-700 text-white hover:bg-gray-800;
 }

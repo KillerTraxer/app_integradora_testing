@@ -7,6 +7,9 @@ import { addMinute } from "@formkit/tempo";
 import nodemailer from "nodemailer";
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from 'uuid';
+import firebaseAdmin from "../firebase.js";
+
+const { firestore } = firebaseAdmin;
 
 const secretKey = process.env.JWT_SECRET;
 
@@ -74,6 +77,16 @@ route.post("/register", async (req, res) => {
         });
 
         await newPatient.save();
+
+        const pacienteId = newPatient._id.toString();
+
+        const pacienteRef = firestore.collection('pacientes').doc(pacienteId);
+        await pacienteRef.set({
+            nombre,
+            apellidos,
+            telefono,
+            email,
+        });
         res.status(201).json({ message: "Usuario creado exitosamente" });
     } catch (error) {
         console.error("Error al crear el usuario:", error);
@@ -126,9 +139,7 @@ route.post("/generate-otp", async (req, res) => {
         { new: true, upsert: true }
     );
 
-    // Aquí podrías enviar el OTP por correo electrónico o SMS al usuario
     try {
-        // Send email
         transporter.sendMail({
             from: 'Dental Care <no-reply@dentalcare.com>',
             to: user.email,
@@ -299,5 +310,36 @@ route.post("/refresh-token", async (req, res) => {
         res.status(500).json({ message: "Error al actualizar el token." });
     }
 });
+
+route.post("/save-fcm-token", async (req, res) => {
+    const { token, userId } = req.body;
+
+    if (!token || !userId) {
+        return res
+            .status(400)
+            .json({ errorFields: "Todos los campos son obligatorios" });
+    }
+
+    try {
+        const pacienteRef = firestore.collection('pacientes').doc(userId.toString());
+        const dentistaRef = firestore.collection('dentistas').doc(userId.toString());
+
+        const pacienteDoc = await pacienteRef.get();
+        const dentistaDoc = await dentistaRef.get();
+
+        if (pacienteDoc.exists) {
+            // Si el usuario está en la colección de pacientes, asignar el token FCM
+            await pacienteRef.update({ fcmToken: token });
+        } else if (dentistaDoc.exists) {
+            // Si el usuario está en la colección de dentistas, asignar el token FCM
+            await dentistaRef.update({ fcmToken: token });
+        }
+
+        res.json({ message: "Token FCM guardado correctamente" });
+    } catch (error) {
+        console.error("Error al guardar el token FCM:", error);
+        res.status(500).json({ message: "Error al guardar el token FCM." });
+    }
+})
 
 export default route;

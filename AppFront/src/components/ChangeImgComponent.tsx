@@ -39,7 +39,7 @@ export default function ChangeImgComponent() {
                         <Button
                             isIconOnly
                             color="danger"
-                            variant="light"
+                            variant="flat"
                             size="sm"
                             className="absolute -top-5 -left-3 z-10"
                             onClick={handleImageDelete}
@@ -77,7 +77,7 @@ export default function ChangeImgComponent() {
             </div>
             <p className="text-sm font-extralight">Haz clic en el ícono de cámara para cambiar tu foto</p>
             {isNewImageSelected && (
-                <Button color="primary" onClick={handleImageSave}>
+                <Button color="primary" variant="flat" onClick={handleImageSave}>
                     Guardar imagen
                 </Button>
             )}

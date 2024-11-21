@@ -7,7 +7,7 @@ export default function ConfigPage() {
 
     return (
         <div>
-            <h1 className='text-2xl font-semibold'>Configuracion de perfil</h1>
+            <h1 className='text-2xl font-semibold'>Configuración de perfil</h1>
             <p className='font-light mb-8'>Administra tu información personal y configuración de cuenta</p>
 
             {/* PICTURE SETTINGS */}

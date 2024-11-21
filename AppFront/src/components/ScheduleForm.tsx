@@ -1,91 +1,196 @@
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
-import { Button, Input, Textarea } from '@nextui-org/react';
-import { motion, AnimatePresence } from 'framer-motion'
-import { useState } from 'react';
-import React from "react";
-import { Mail, Phone, User2, Users, CheckCircle, Calendar } from 'lucide-react'
-import { DatePicker, Form } from 'antd';
-import type { DatePickerProps, GetProps } from 'antd';
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure, Textarea, Select, SelectItem, Avatar, Spinner, Tooltip, Chip } from "@nextui-org/react";
+import { useState, useEffect } from 'react';
+import { Calendar, CirclePlus } from 'lucide-react'
+import { DatePicker, Form, ConfigProvider } from 'antd';
+import useAuthStore from "@/store/authStore"
+import useFetchData from "@/hooks/useFetchData"
+import axiosInstanceWithAuth from "@/utils/axiosInstanceWithAuth"
+import toastSuccess from "@/components/ui/toastSuccess";
 import dayjs from 'dayjs';
-// import { format } from "@formkit/tempo"
-import api from "@/axiosInstance";
+import utc from 'dayjs/plugin/utc';
 
-type RangePickerProps = GetProps<typeof DatePicker.RangePicker>;
+dayjs.extend(utc);
 
-interface Props {
-    onSuccess: () => void;
-}
-
-export default function ScheduleForm({ onSuccess }: Props) {
+export default function ScheduleForm({ onNewAppointment }: any) {
     const [focusedField, setFocusedField] = useState<string | null>(null);
     const [selectedDate, setSelectedDate] = useState<any>(null);
     const [loading, setLoading] = useState(false);
-    const [isSuccess, setIsSuccess] = useState(false);
     const [submitStatus, setSubmitStatus] = useState<string | null>(null)
+    const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+    const { theme, auth } = useAuthStore();
+    const { data: listaDentistas, isLoading: isLoadingDentistas } = useFetchData("/dentista", null);
+    const [dentistaId, setDentistaId] = useState(null);
+    const [agendaDoc, setAgendaDoc] = useState(null);
+    const [loadingAgendaDoc, setLoadingAgendaDoc] = useState(false);
+    const [newCita, setNewCita] = useState(false);
+    const [hasConfirmedAppointment, setHasConfirmedAppointment] = useState(false);
+    const [loadingHasConfirmedAppointment, setLoadingHasConfirmedAppointment] = useState(true);
+    const { data: citasForMe, isLoading: isLoadingCitasForMe } = useFetchData(`/citas/paciente/${auth?.user._id}`, null, newCita);
+    const [citasConfirmadas, setCitasConfirmadas] = useState([]);
+    const { data: citas, isLoading: isLoadingCitas } = useFetchData(`/citas`, null);
 
-    const onOk = (value: DatePickerProps['value'] | RangePickerProps['value']) => {
-        console.log('onOk: ', value);
-    };
+    useEffect(() => {
+        if (!isLoadingCitas) {
+            const citasConfirmadas = citas?.filter((cita: any) => cita.status === "confirmada") || [];
+            setCitasConfirmadas(citasConfirmadas);
+        }
+    }, [isLoadingCitas, citas]);
 
     const disabledDate = (current: any) => {
-        return current.isBefore(dayjs().startOf('day'));
+        //@ts-ignore
+        if (!agendaDoc || !agendaDoc.diasTrabajo) return () => false;
+
+        const currentDay = dayjs(current).day();
+        const today = dayjs()
+
+        //@ts-ignore
+        let isDisabledBySchedule = !agendaDoc.diasTrabajo.some(dia => dia.dia === currentDay && dia.activo);
+
+        //@ts-ignore
+        const eventsOnDay = agendaDoc.eventos.filter(event =>
+            dayjs(event.fechaInicio).isSame(dayjs(current), 'day') &&
+            dayjs(event.fechaFin).isSame(dayjs(current), 'day')
+        );
+
+        if (eventsOnDay.length > 0 && eventsOnDay.every((event: any) => event.allDay)) {
+            isDisabledBySchedule = true;
+        }
+
+        if (dayjs(current).isBefore(today, 'day') || dayjs(current).isSame(today, 'day')) {
+            isDisabledBySchedule = true;
+        }
+
+        return isDisabledBySchedule;
     };
 
-    const onChange = (dateString: any) => {
-        const date = dayjs(dateString, 'DD/MM/YYYY HH:mm:ss');
-        const isoDate = date.format('YYYY-MM-DDTHH:mm:ss.sssZ');
+    const disabledTime = (date: any) => {
+        //@ts-ignore
+        if (!agendaDoc || !agendaDoc.horario) return {
+            disabledHours: () => Array.from({ length: 24 }, (_, i) => i),
+            disabledMinutes: () => Array.from({ length: 60 }, (_, i) => i)
+        };
 
-        // const formattedExpiry = format({
-        //     date: isoDate,
-        //     format: "DD/MM/YYYY HH:mm A",
-        //     tz: "America/Mexico_City"
-        // });
+        //@ts-ignore
+        const [startHour, startMinute] = agendaDoc.horario.inicio.split(':').map(Number);
+        //@ts-ignore
+        const [endHour, endMinute] = agendaDoc.horario.fin.split(':').map(Number);
 
-        // console.log(formattedExpiry)
-        setSelectedDate(isoDate);
+        //@ts-ignore
+        const eventos = agendaDoc.eventos || [];
+
+        const isTimeBooked = (hour: any, minute: any) => {
+            //@ts-ignore
+            const isEventBooked = eventos.some((event: any) => {
+                const eventStart = dayjs(event.fechaInicio);
+                const eventEnd = dayjs(event.fechaFin);
+                const selectedDateTime = dayjs(date).hour(hour).minute(minute);
+
+                return selectedDateTime.isBetween(eventStart, eventEnd, null, '[)');
+            });
+
+            const isCitaBooked = citasConfirmadas.some((cita: any) => {
+                const citaDateTime = dayjs(cita.fecha);
+                return date.isSame(citaDateTime, 'day') &&
+                    hour === citaDateTime.hour() &&
+                    minute === citaDateTime.minute();
+            });
+
+            return isCitaBooked || isEventBooked;
+        };
+
+        const disabledHours = () => {
+            const hours = [];
+            for (let i = 0; i < 24; i++) {
+                if (i < startHour || i > endHour || Array.from({ length: 60 }, (_, m) => isTimeBooked(i, m)).every(Boolean)) {
+                    hours.push(i);
+                }
+            }
+            return hours;
+        };
+
+        const disabledMinutes = (selectedHour: any) => {
+            const minutes = [];
+            for (let i = 0; i < 60; i++) {
+                if (
+                    (selectedHour === startHour && i < startMinute) ||
+                    (selectedHour === endHour && i > endMinute) ||
+                    isTimeBooked(selectedHour, i)
+                ) {
+                    minutes.push(i);
+                }
+            }
+            return minutes;
+        };
+
+        return {
+            disabledHours,
+            disabledMinutes
+        };
+    };
+
+    const fetchAgendaDoc = async () => {
+        setLoadingAgendaDoc(true);
+        try {
+            const response = await axiosInstanceWithAuth.get(`/agendaDoc/${dentistaId}`);
+            setAgendaDoc(response.data);
+        } catch (err: any) {
+            console.log(err);
+        } finally {
+            setLoadingAgendaDoc(false);
+        }
     }
+
+    useEffect(() => {
+        if (dentistaId) {
+            fetchAgendaDoc();
+        }
+    }, [dentistaId]);
+
+    const colores = [
+        'bg-green-500',
+        'bg-orange-500',
+        'bg-purple-500',
+        'bg-yellow-500',
+        'bg-blue-200',
+        'bg-red-500',
+    ];
+
+    const colorCita = colores[Math.floor(Math.random() * colores.length)];
 
     const formik = useFormik({
         initialValues: {
-            name: '',
-            lastNames: '',
-            phone: '',
-            email: '',
+            fecha: '',
             motivo: '',
+            dentista: '',
         },
         validationSchema: Yup.object({
-            name: Yup.string()
-                .matches(/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/, 'El nombre solo puede contener letras y acentos')
-                .required('El nombre es requerido'),
-            lastNames: Yup.string()
-                .matches(/^[A-Za-zÁÉÍÓÚáéíóúñÑ\s]+$/, 'Los apellidos solo pueden contener letras y acentos')
-                .required('Los apellidos son requeridos'),
-            phone: Yup.string().matches(/^\d{10}$/, 'El teléfono debe tener 10 dígitos').required('El teléfono es requerido'),
-            email: Yup.string().email('Email inválido').required('El email es requerido'),
+            fecha: Yup.string().required('La fecha es requerida'),
             motivo: Yup.string().required('El motivo es requerido'),
+            dentista: Yup.string().required('El dentista es requerido'),
         }),
         onSubmit: async (values) => {
             setLoading(true);
             setSubmitStatus(null);
 
             try {
-                await api.post('/citas/public', {
-                    nombre: values.name,
-                    apellidos: values.lastNames,
-                    telefono: values.phone,
-                    email: values.email,
+                await axiosInstanceWithAuth.post(`/citas/${auth?.user._id}`, {
+                    dentistaId: values.dentista,
                     fecha: selectedDate,
                     motivo: values.motivo,
+                    status: 'confirmada',
+                    colorCita
                 });
 
-                setIsSuccess(true);
                 setSelectedDate(null);
                 formik.resetForm();
-                onSuccess();
-            } catch (error: any) {
-                setIsSuccess(false);
 
+                onClose();
+                toastSuccess({ message: 'Cita agendada exitosamente' });
+                onNewAppointment();
+                setNewCita(true);
+            } catch (error: any) {
                 if (error.response && error.response.status === 400) {
                     const { errors } = error.response.data;
 
@@ -99,6 +204,7 @@ export default function ScheduleForm({ onSuccess }: Props) {
         },
     });
 
+
     const getInputColor = (fieldName: string) => {
         if (focusedField === fieldName) {
             return formik.touched[fieldName as keyof typeof formik.touched] && formik.errors[fieldName as keyof typeof formik.errors] ? "danger" : "primary";
@@ -106,140 +212,256 @@ export default function ScheduleForm({ onSuccess }: Props) {
         return "default";
     }
 
-    const getIconColor = (fieldName: string) => {
-        if (focusedField === fieldName) {
-            return formik.touched[fieldName as keyof typeof formik.touched] && formik.errors[fieldName as keyof typeof formik.errors] ? 'text-danger' : 'text-primary';
-        }
-        return formik.touched[fieldName as keyof typeof formik.touched] && formik.errors[fieldName as keyof typeof formik.errors] ? 'text-danger' : 'text-gray-400';
-    }
+    const datePickerTheme = {
+        components: {
+            DatePicker: {
+                colorBgContainer: theme === 'dark' ? '#27272a' : '#ffffff',
+                colorBgElevated: theme === 'dark' ? '#27272a' : '#ffffff',
+                colorText: theme === 'dark' ? '#fff' : '#000000',
+                colorTextPlaceholder: theme === 'dark' ? '#9ca3af' : '#6b7280',
+                cellHoverBg: theme === "dark" ? '#1f1f1f' : "#f5f5f5",
+                controlItemBgActive: theme === "dark" ? '#3b3b42' : '#e6f4ff', // Color de fondo cuando está seleccionado
+                colorIcon: theme === "dark" ? "#fff" : "#a9a9a9", // Color de los iconos (flechas)
+                colorIconHover: theme === "dark" ? "#fff" : "#1f1f1f", // Color de los iconos en hover
+                colorTextHeading: theme === "dark" ? "#fff" : '#1f1f1f', // Color del texto del encabezado (mes/año)
+            },
+        },
+    };
 
-    const renderInput = (fieldName: string, label: string, icon: React.ReactNode, type: string = "text") => (
-        <Input
-            id={fieldName}
-            name={fieldName}
-            label={label}
-            placeholder={`Ingresa tu ${label.toLowerCase()}`}
-            type={type}
-            value={formik.values[fieldName as keyof typeof formik.values]}
-            onChange={formik.handleChange}
-            onBlur={(e) => {
-                formik.handleBlur(e);
-                setFocusedField(null);
-            }}
-            onFocus={() => setFocusedField(fieldName)}
-            isInvalid={formik.touched[fieldName as keyof typeof formik.touched] && !!formik.errors[fieldName as keyof typeof formik.errors]}
-            errorMessage={formik.touched[fieldName as keyof typeof formik.touched] && formik.errors[fieldName as keyof typeof formik.errors]}
-            startContent={React.cloneElement(icon as React.ReactElement, { className: getIconColor(fieldName), size: 18 })}
-            color={getInputColor(fieldName)}
-        />
-    )
+    useEffect(() => {
+        const checkHasConfirmedAppointment = async () => {
+            setLoadingHasConfirmedAppointment(true);
+            try {
+                const hasConfirmed = !isLoadingCitasForMe && citasForMe !== null && citasForMe.length > 0 && citasForMe.some((cita: any) => cita.status === 'confirmada');
+                setHasConfirmedAppointment(hasConfirmed);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoadingHasConfirmedAppointment(false);
+            }
+        };
+        checkHasConfirmedAppointment();
+    }, [citasForMe, isLoadingCitasForMe]);
 
     return (
         <>
-            {submitStatus && (
-                <p className="bg-red-100 text-red-500 p-3 rounded-md mb-4">
-                    {submitStatus}
-                </p>
+            {loadingHasConfirmedAppointment ? (
+                <Spinner />
+            ) : (
+                hasConfirmedAppointment ? (
+                    <Tooltip content="No puedes agendar una cita si ya tienes una confirmada" placement="right" showArrow={true} color="primary">
+                        <Chip
+                            variant="flat"
+                            className={`${theme === "dark" ? "bg-[#0f213b] text-[#536d8e] hover:bg-[#0f213b]" : "bg-[#d5e4f8] text-[#769bc6] hover:bg-[#d5e4f8]"} mb-5 flex cursor-default justify-center gap-3 px-9 py-5 font-semibold rounded-lg text-base`}
+                            startContent={<CirclePlus className={`${theme === 'dark' ? 'text-[#536d8e]' : 'text-[#769bc6]'}`} />}
+                        >
+                            Agendar cita
+                        </Chip>
+                    </Tooltip>
+                ) : (
+                    <Button
+                        className="w-52 mb-5 flex justify-center gap-3 px-3 font-semibold rounded-lg text-base"
+                        variant="flat"
+                        color='primary'
+                        startContent={<CirclePlus />}
+                        onPress={onOpen}
+                    >
+                        Agendar cita
+                    </Button>
+                )
             )}
 
-            <form onSubmit={formik.handleSubmit}>
-                <div className="space-y-4">
-                    <div className='flex flex-row space-x-8'>
-                        <div className='w-full'>
-                            {renderInput("name", "Nombre", <User2 />)}
-                        </div>
+            <Modal
+                backdrop="blur"
+                isOpen={isOpen}
+                onOpenChange={onOpenChange}
+                className="card-bg"
+                hideCloseButton
+                size="xl"
+                placement='center'
+                onClose={() => {
+                    onClose();
+                    formik.resetForm();
+                    setSubmitStatus(null);
+                    setAgendaDoc(null);
+                    setDentistaId(null);
+                    setFocusedField(null);
+                    setSelectedDate(null);
+                }}
+                isDismissable={!loading}
+            >
+                <ModalContent>
+                    {(onClose) => (
+                        <>
+                            <ModalHeader>Agendar cita</ModalHeader>
+                            <ModalBody>
+                                {submitStatus && (
+                                    <p className={`${theme === "dark" ? "bg-[#3b1d36]" : "bg-[#fdd0df]"} p-3 rounded-md mb-4`} style={{ color: theme === "dark" ? "#ef4444" : "#68102e" }}>
+                                        {submitStatus}
+                                    </p>
+                                )}
 
-                        <div className='w-full'>
-                            {renderInput("lastNames", "Apellidos", <Users />)}
-                        </div>
-                    </div>
+                                <form onSubmit={formik.handleSubmit}>
+                                    <div className="space-y-4">
+                                        <Select
+                                            items={listaDentistas}
+                                            label="Dentistas"
+                                            placeholder="Elige a tu dentista"
+                                            name="dentista"
+                                            id='dentista'
+                                            isInvalid={formik.touched["dentista" as keyof typeof formik.touched] && !!formik.errors["dentista" as keyof typeof formik.errors]}
+                                            errorMessage={formik.touched["dentista" as keyof typeof formik.touched] && formik.errors["dentista" as keyof typeof formik.errors]}
+                                            color={getInputColor('dentista')}
+                                            value={formik.values.dentista}
+                                            onChange={formik.handleChange}
+                                            onBlur={(e) => {
+                                                formik.handleBlur(e);
+                                                setFocusedField(null);
+                                            }}
+                                            onFocus={() => setFocusedField('dentista')}
+                                            onSelectionChange={(dentista: any) => {
+                                                formik.setFieldValue('dentista', dentista);
+                                                setDentistaId(dentista.currentKey);
+                                            }}
 
-                    {renderInput("phone", "Teléfono", <Phone />)}
-                    {renderInput("email", "Email", <Mail />)}
+                                            classNames={{
+                                                label: "group-data-[filled=true]:mb-4",
+                                                trigger: "min-h-16",
+                                                listboxWrapper: "max-h-[400px]",
+                                            }}
+                                            listboxProps={{
+                                                itemClasses: {
+                                                    base: [
+                                                        "rounded-md",
+                                                        "text-default-500",
+                                                        "transition-opacity",
+                                                        "data-[hover=true]:text-foreground",
+                                                        "data-[hover=true]:bg-default-100",
+                                                        "dark:data-[hover=true]:bg-default-50",
+                                                        "data-[selectable=true]:focus:bg-default-50",
+                                                        "data-[pressed=true]:opacity-70",
+                                                        "data-[focus-visible=true]:ring-default-500",
+                                                    ],
+                                                },
+                                            }}
+                                            renderValue={(items) => {
+                                                return items.map((item) => (
+                                                    <div key={item.key} className="flex items-center gap-2">
+                                                        <Avatar
+                                                            alt={item?.props?.nombre}
+                                                            className="flex-shrink-0"
+                                                            size="sm"
+                                                            src={undefined}
+                                                        />
+                                                        <div className="flex flex-col">
+                                                            <span>{item?.props?.value.nombre}</span>
+                                                            <span className="text-default-500 text-tiny">{item?.props?.value?.email}</span>
+                                                        </div>
+                                                    </div>
+                                                ));
+                                            }}
+                                        >
+                                            {isLoadingDentistas ? (
+                                                <SelectItem key={"loading"} value="loading">Cargando dentistas...</SelectItem>
+                                            ) : (
+                                                listaDentistas.map((dentista: any) => (
+                                                    //@ts-ignore
+                                                    <SelectItem aria-label='lista-dentistas' key={dentista._id} value={{ id: dentista._id, nombre: dentista.nombre, email: dentista.email }}>
+                                                        <div className="flex gap-2 items-center">
+                                                            <Avatar alt={dentista.nombre} className="flex-shrink-0" size="sm" src={undefined} />
+                                                            <div className="flex flex-col">
+                                                                <span className="text-small">{dentista.nombre}</span>
+                                                                <span className="text-tiny text-default-400">{dentista.email}</span>
+                                                            </div>
+                                                        </div>
+                                                    </SelectItem>
+                                                ))
+                                            )}
+                                        </Select>
 
-                    <Form.Item
-                        label={<label style={{ fontSize: 13, paddingLeft: 14 }}>Fecha y hora</label>}
-                        className='bg-[#f4f4f5] rounded-xl hover:bg-[#e4e4e7] active:bg-[#e6f1fe]'
-                        colon={false}
-                        labelCol={{ flex: '100px' }}
-                        labelAlign="left"
-                    >
-                        <DatePicker
-                            showTime
-                            onChange={onChange}
-                            onOk={onOk}
-                            size='large'
-                            className='w-full'
-                            variant='borderless'
-                            placeholder='Selecciona una fecha y hora'
-                            suffixIcon={<Calendar size={18} />}
-                            format='DD/MM/YYYY HH:mm:ss'
-                            disabledDate={disabledDate}
-                        />
-                    </Form.Item>
-                    {/* {<p className='text-xs text-danger '>La fecha es necesaria</p>} */}
 
-                    <Textarea
-                        id='motivo'
-                        name='motivo'
-                        label="Motivo"
-                        placeholder="Escribe el motivo de tu cita."
-                        value={formik.values["motivo" as keyof typeof formik.values]}
-                        classNames={{
-                            base: "w-full",
-                            input: "resize-y min-h-[40px]",
-                        }}
-                        onChange={formik.handleChange}
-                        onBlur={(e) => {
-                            formik.handleBlur(e);
-                            setFocusedField(null);
-                        }}
-                        disableAutosize
-                        rows={3}
-                        color={getInputColor("motivo")}
-                        onFocus={() => setFocusedField('motivo')}
-                        isInvalid={formik.touched["motivo" as keyof typeof formik.touched] && !!formik.errors["motivo" as keyof typeof formik.errors]}
-                        errorMessage={formik.touched["motivo" as keyof typeof formik.touched] && formik.errors["motivo" as keyof typeof formik.errors]}
-                    />
-                </div>
+                                        <ConfigProvider theme={datePickerTheme}>
+                                            <Form.Item
+                                                label={<label style={{ fontSize: 12, paddingLeft: 14 }} className={`${formik.errors.fecha ? "text-danger" : "input-date-label"} font-normal`}>Fecha y hora</label>}
+                                                className={`${formik.errors.fecha ? theme === "dark" ? "bg-[#310413]" : "bg-[#fee7ef]" : "input-date-bg"} rounded-xl flex relative`}
+                                                colon={false}
+                                                labelCol={{ flex: '100px' }}
+                                                labelAlign="left"
+                                                id='fecha'
+                                                name='fecha'
+                                            >
+                                                {loadingAgendaDoc ? (
+                                                    <Spinner />
+                                                ) : (
+                                                    <DatePicker
+                                                        value={selectedDate}
+                                                        disabled={agendaDoc === null ? true : false}
+                                                        showTime={{ format: 'HH:mm' }}
+                                                        onChange={(dateString: any) => {
+                                                            const date = dayjs(dateString, 'DD/MM/YYYY HH:mm:ss');
+                                                            const isoDate = date.format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+                                                            setSelectedDate(isoDate);
+                                                            formik.setFieldValue('fecha', isoDate);
+                                                        }}
+                                                        //@ts-ignore
+                                                        minuteStep={agendaDoc?.intervaloCitas?.duracion}
+                                                        //@ts-ignore
+                                                        disabledDate={disabledDate}
+                                                        disabledTime={disabledTime}
+                                                        size='large'
+                                                        className='w-full border border-input px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50'
+                                                        variant='borderless'
+                                                        placeholder='Selecciona una fecha y hora'
+                                                        suffixIcon={<Calendar size={18} />}
+                                                        format='DD/MM/YYYY HH:mm'
+                                                        getPopupContainer={(triggerNode) => triggerNode.parentNode as HTMLElement}
+                                                        popupClassName="date-picker-popup"
+                                                    />
+                                                )}
+                                            </Form.Item>
+                                        </ConfigProvider>
 
-                <Button isDisabled={isSuccess} isLoading={loading} type="submit" className="w-full p-2 mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-base">
-                    <AnimatePresence mode='wait'>
-                        {loading && (
-                            <motion.div
-                                key="loading"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="absolute inset-0 flex items-center justify-center"
-                            >
+                                        {formik.errors.fecha && (
+                                            <p className='text-xs' style={{ color: "#f31260" }}>{formik.errors.fecha}</p>
+                                        )}
 
-                            </motion.div>
-                        )}
-                        {!loading && !isSuccess && (
-                            <motion.div
-                                key="register"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                            >
-                                Enviar
-                            </motion.div>
-                        )}
-                        {!loading && isSuccess && (
-                            <motion.div
-                                key="success"
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                                className="absolute inset-0 flex items-center justify-center"
-                            >
-                                <CheckCircle className="text-white" size={24} />
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </Button>
-            </form>
+                                        <Textarea
+                                            id='motivo'
+                                            name='motivo'
+                                            label="Motivo"
+                                            placeholder="Escribe el motivo de tu cita."
+                                            value={formik.values["motivo" as keyof typeof formik.values]}
+                                            classNames={{
+                                                base: "w-full",
+                                                input: "resize-y min-h-[40px]",
+                                            }}
+                                            onChange={formik.handleChange}
+                                            onBlur={(e) => {
+                                                formik.handleBlur(e);
+                                                setFocusedField(null);
+                                            }}
+                                            disableAutosize
+                                            rows={2}
+                                            color={getInputColor("motivo")}
+                                            onFocus={() => setFocusedField('motivo')}
+                                            isInvalid={formik.touched["motivo" as keyof typeof formik.touched] && !!formik.errors["motivo" as keyof typeof formik.errors]}
+                                            errorMessage={formik.touched["motivo" as keyof typeof formik.touched] && formik.errors["motivo" as keyof typeof formik.errors]}
+                                        />
+                                    </div>
+                                </form>
+                            </ModalBody>
+                            <ModalFooter>
+                                <Button className="font-semibold rounded-lg text-base" color='danger' variant='flat' onPress={() => { onClose(); formik.resetForm(); setSubmitStatus(null); setAgendaDoc(null); setDentistaId(null); setFocusedField(null); }}>
+                                    Cerrar
+                                </Button>
+                                <Button isLoading={loading} onPress={() => formik.handleSubmit()} className="font-semibold rounded-lg text-base" variant='flat' color='primary' type="submit">
+                                    Agendar
+                                </Button>
+                            </ModalFooter>
+                        </>
+                    )}
+                </ModalContent>
+            </Modal>
         </>
     )
 }

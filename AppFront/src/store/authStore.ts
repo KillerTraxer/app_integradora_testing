@@ -16,6 +16,7 @@ interface AuthData {
         updatedAt: string;
         __v: number;
         refreshToken: string;
+        status: string;
         theme: 'light' | 'dark';
     };
     accessToken: string;

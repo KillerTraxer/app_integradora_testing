@@ -1,4 +1,4 @@
-import { Calendar, Home, Users, Clock, MenuIcon } from "lucide-react"
+import { Calendar, Home, Users, Clock, MenuIcon, CalendarHeart } from "lucide-react"
 import { Image } from "@nextui-org/image";
 import LogoWthBg from "@/assets/LogoWthBg.svg"
 import { motion } from "framer-motion"
@@ -15,37 +15,72 @@ import {
     useSidebar,
 } from "@/components/ui/sidebar"
 
+import useAuthStore from "@/store/authStore"
+import { useNavigate } from "react-router-dom"
+
 // Menu items.
-const items = [
+const itemsAdmin = [
     {
         title: "Inicio",
         url: "/home",
         icon: Home,
     },
     {
-        title: "Calendar",
+        title: "Calendario",
         url: "#",
         icon: Calendar,
     },
     {
         title: "Citas",
-        url: "#",
+        url: "/citas",
         icon: Clock,
     },
     {
         title: "Pacientes",
-        url: "#",
+        url: "/pacientes",
         icon: Users,
+    },
+];
+
+const itemsUser = [
+    {
+        title: "Inicio",
+        url: "/home",
+        icon: Home,
+    },
+    {
+        title: "Calendario",
+        url: "#",
+        icon: Calendar,
+    },
+    {
+        title: "Historial de citas",
+        url: "/citas",
+        icon: Clock,
+    },
+    {
+        title: "Tratamientos",
+        url: "#",
+        icon: CalendarHeart,
     },
 ]
 
 export function AppSidebar() {
+    const navigate = useNavigate();
     const { toggleSidebar } = useSidebar();
+    const { auth } = useAuthStore();
+
+    const getMenuItems = (rol: any) => {
+        switch (rol) {
+            case "dentista":
+                return itemsAdmin;
+            default:
+                return itemsUser;
+        }
+    };
 
     return (
-        <motion.div initial={{ opacity: 0, x: -100 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.5 }}>
+        <motion.div>
             <Sidebar collapsible="offcanvas" variant="inset">
                 <SidebarContent>
                     <SidebarGroup>
@@ -63,16 +98,18 @@ export function AppSidebar() {
                         </div>
                         <SidebarGroupContent className="pt-4 pl-3">
                             <SidebarMenu className="space-y-2">
-                                {items.map((item) => (
-                                    <SidebarMenuItem key={item.title}>
-                                        <SidebarMenuButton asChild className="text-lg text-[#5E6E82] hover:text-[#0186D6] focus:text-[#0186D6] active:text-[#317098] font-medium">
-                                            <a href={item.url} className="gap-4">
-                                                <item.icon style={{ width: '19px', height: '19px' }} className="color-icons" />
-                                                <span className="color-icons">{item.title}</span>
-                                            </a>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                ))}
+                                {getMenuItems(auth?.user.rol).map((item) => {
+                                    return (
+                                        <SidebarMenuItem key={item.title}>
+                                            <SidebarMenuButton asChild className="text-lg text-[#5E6E82] hover:text-[#0186D6] focus:text-[#0186D6] active:text-[#317098] font-medium">
+                                                <div className="gap-4 cursor-pointer" onClick={() => navigate(item.url)}>
+                                                    <item.icon style={{ width: '19px', height: '19px' }} className="color-icons" />
+                                                    <span className="color-icons">{item.title}</span>
+                                                </div>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    )
+                                })}
                             </SidebarMenu>
                         </SidebarGroupContent>
                     </SidebarGroup>
