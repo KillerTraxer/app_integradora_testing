@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardBody, Spinner } from "@nextui-org/react";
+import { Card, CardHeader, CardBody, Spinner, Chip } from "@nextui-org/react";
 import useFetchData from "@/hooks/useFetchData";
 import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc'
@@ -24,7 +24,7 @@ export default function ListOfAppointmentsAdmin() {
         const today = new Date();
 
         events = citas
-            .filter((cita: any) => dayjs(cita.fecha).isSameOrAfter(today, "day"))
+            .filter((cita: any) => dayjs(cita.fecha).isSameOrAfter(today, "day") && cita.status !== 'sin realizar' && cita.status !== 'realizada')
             .map((cita: any) => ({
                 id: cita._id,
                 title: cita.motivo,
@@ -33,6 +33,21 @@ export default function ListOfAppointmentsAdmin() {
                 date: dayjs(cita.fecha).toDate(),
                 status: cita.status
             }));
+    }
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'confirmada':
+                return 'success'
+            case 'realizada':
+                return 'primary'
+            case 'cancelada':
+                return 'danger'
+            case 'sin realizar':
+                return 'warning'
+            default:
+                return 'primary'
+        }
     }
 
     function EventList() {
@@ -75,7 +90,14 @@ export default function ListOfAppointmentsAdmin() {
                                     <p className="text-sm text-gray-500">{event.time}</p>
                                 </div>
                                 <div className="text-sm text-right flex flex-col">
-                                    <p style={{ color: event.status === "confirmada" ? (theme === "dark" ? "#9da9a9" : "#6b7280") : "red" }}>{event.status === "confirmada" ? "Confirmada" : "Cancelada"}</p>
+                                    <div className="ml-auto">
+                                        <Chip color={getStatusColor(event.status)} variant="flat">
+                                            {event.status === 'confirmada' ? 'Confirmada' :
+                                                event.status === 'realizada' ? 'Completada' :
+                                                    event.status === 'cancelada' ? 'Cancelada' :
+                                                        event.status === 'sin realizar' ? 'Sin Realizar' : ''}
+                                        </Chip>
+                                    </div>
                                     <p>{formatDate(event.date)}</p>
                                 </div>
                             </div>

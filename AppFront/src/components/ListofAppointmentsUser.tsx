@@ -1,4 +1,4 @@
-import { Card, CardHeader, CardBody, Spinner } from "@nextui-org/react";
+import { Card, CardHeader, CardBody, Spinner, Chip } from "@nextui-org/react";
 import useFetchData from "@/hooks/useFetchData";
 import useAuthStore from "@/store/authStore";
 import dayjs from "dayjs";
@@ -16,7 +16,7 @@ dayjs.locale('es')
 
 export default function ListOfAppointmentsUser({ newAppointmentCreated, onResetNewAppointmentCreated }: any) {
     const navigate = useNavigate();
-    const { auth, theme } = useAuthStore();
+    const { auth } = useAuthStore();
     const { data: citas, isLoading: isLoadingCitas } = useFetchData(`/citas/paciente/${auth?.user._id}`, null, newAppointmentCreated);
 
     let events = [] as any;
@@ -24,7 +24,7 @@ export default function ListOfAppointmentsUser({ newAppointmentCreated, onResetN
     if (!isLoadingCitas) {
         const today = new Date();
         events = citas
-            .filter((cita: any) => dayjs(cita.fecha).isSameOrAfter(today, "day"))
+            .filter((cita: any) => dayjs(cita.fecha).isSameOrAfter(today, "day") && cita.status !== 'sin realizar' && cita.status !== 'realizada')
             .map((cita: any) => ({
                 id: cita._id,
                 title: cita.motivo,
@@ -40,6 +40,21 @@ export default function ListOfAppointmentsUser({ newAppointmentCreated, onResetN
             onResetNewAppointmentCreated();
         }
     }, [isLoadingCitas, newAppointmentCreated]);
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'confirmada':
+                return 'success'
+            case 'realizada':
+                return 'primary'
+            case 'cancelada':
+                return 'danger'
+            case 'sin realizar':
+                return 'warning'
+            default:
+                return 'primary'
+        }
+    }
 
     function EventList() {
         const today = new Date();
@@ -81,7 +96,14 @@ export default function ListOfAppointmentsUser({ newAppointmentCreated, onResetN
                                     <p className="text-sm text-gray-500">{event.time}</p>
                                 </div>
                                 <div className="text-sm text-right flex flex-col">
-                                    <p style={{ color: event.status === "confirmada" ? (theme === "dark" ? "#9da9a9" : "#6b7280") : "red" }}>{event.status === "confirmada" ? "Confirmada" : "Cancelada"}</p>
+                                    <div className="ml-auto">
+                                        <Chip color={getStatusColor(event.status)} variant="flat">
+                                            {event.status === 'confirmada' ? 'Confirmada' :
+                                                event.status === 'realizada' ? 'Completada' :
+                                                    event.status === 'cancelada' ? 'Cancelada' :
+                                                        event.status === 'sin realizar' ? 'Sin Realizar' : ''}
+                                        </Chip>
+                                    </div>
                                     <p>{formatDate(event.date)}</p>
                                 </div>
                             </div>
