@@ -13,12 +13,15 @@ const actualizarEstatusCitas = () => {
                 const fechaCita = dayjs(cita.fecha);
 
                 const siguienteCita = await Citas.findOne({
+                    // dentista: cita.dentista,
                     fecha: { $gt: cita.fecha }
                 }).sort({ fecha: 1 });
 
                 if (siguienteCita) {
-                    if (fechaActual.isAfter(fechaCita)) {
-                        await Citas.findByIdAndUpdate(cita._id, { status: 'realizada' });
+                    const fechaSiguienteCita = dayjs(siguienteCita.fecha);
+
+                    if (fechaActual.isAfter(fechaSiguienteCita) && fechaActual.isAfter(fechaCita)) {
+                        await Citas.findByIdAndUpdate(cita._id, { status: 'sin realizar' });
                         console.log('Estatus actualizado');
                     }
                 } else {
@@ -29,7 +32,8 @@ const actualizarEstatusCitas = () => {
 
                     if (fechaActual.isAfter(fechaCita) && fechaActual.isAfter(horaFinDayjs)) {
                         await Citas.findByIdAndUpdate(cita._id, { status: 'sin realizar' });
-                        console.log('Estatus actualizado');
+                        console.log(`Cita ${cita._id} marcada como "sin realizar" por horario de cierre.`);
+
                     }
                 }
             }

@@ -7,6 +7,7 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import 'dayjs/locale/es'
+import { useState, useEffect } from "react";
 
 // Extend dayjs with plugins
 dayjs.extend(utc)
@@ -19,9 +20,28 @@ export default function CitasDetallesComponent() {
     const params = useParams();
     const idCita = params.id || '';
     const { auth, theme } = useAuthStore();
-    const { data: appointmentDetails, isLoading: isLoadingDetails } = useFetchData(`/citas/${idCita}`, null);
+    const { data: appointmentDetails, isLoading: isLoadingDetails } = useFetchData(`/citas/${idCita}`, null, true);
     const { data: patientInfo, isLoading: isLoadingPatientInfo } = useFetchData(`/pacientes/${appointmentDetails?.paciente}`, null, undefined, !isLoadingDetails && appointmentDetails !== null);
     const { data: dentistaInfo, isLoading: isLoadingDentistaInfo } = useFetchData(`/dentista/${appointmentDetails?.dentista}`, null, undefined, !isLoadingDetails && appointmentDetails !== null);
+    const [canStartAppointment, setCanStartAppointment] = useState(false);
+
+    useEffect(() => {
+        if (!appointmentDetails?.fecha) {
+            setCanStartAppointment(false); // Asegúrate de limpiar el estado
+            return;
+        }
+    
+        const intervalId = setInterval(() => {
+            const appointmentTime = dayjs(appointmentDetails.fecha);
+            const currentTime = dayjs();
+            const timeDiff = appointmentTime.diff(currentTime, 'minute');
+    
+            // Actualiza el estado solo si hay cambios
+            setCanStartAppointment(timeDiff <= 5);
+        }, 1000);
+    
+        return () => clearInterval(intervalId);
+    }, [appointmentDetails?.fecha]);
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -121,7 +141,7 @@ export default function CitasDetallesComponent() {
 
                 {appointmentDetails.status === "confirmada" && auth?.user.rol === "dentista" && (
                     <div>
-                        {dayjs(appointmentDetails.fecha).diff(dayjs(), 'minute') <= 5 ? (
+                        {canStartAppointment ? (
                             <Button
                                 color="primary"
                                 variant="flat"

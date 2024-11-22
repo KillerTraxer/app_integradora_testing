@@ -38,6 +38,14 @@ export default function HomeAdmin() {
         }
     ]
 
+    if (isLoadingCitas || isLoadingPacientes) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <Spinner size='lg' />
+            </div>
+        );
+    }
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {cardsInfo.map((item, index) => (

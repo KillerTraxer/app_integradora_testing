@@ -17,7 +17,8 @@ import {
     Pagination,
     Selection,
     ChipProps,
-    SortDescriptor
+    SortDescriptor,
+    Spinner
 } from "@nextui-org/react";
 import { EllipsisVertical, SearchIcon, ChevronDown } from "lucide-react";
 import useFetchData from "@/hooks/useFetchData";
@@ -305,6 +306,14 @@ export default function CitasforAdmin() {
             </div>
         );
     }, [selectedKeys, items.length, page, pages, hasSearchFilter]);
+
+    if (isLoadingCitas || isLoadingPacientes) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <Spinner size='lg' />
+            </div>
+        );
+    }
 
     return (
         <Table
