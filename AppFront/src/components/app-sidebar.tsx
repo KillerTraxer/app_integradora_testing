@@ -79,6 +79,10 @@ export function AppSidebar() {
         }
     };
 
+    const isActive = (url: string) => {
+        return window.location.pathname === url;
+    };
+
     return (
         <motion.div>
             <Sidebar collapsible="offcanvas" variant="inset">
@@ -101,10 +105,10 @@ export function AppSidebar() {
                                 {getMenuItems(auth?.user.rol).map((item) => {
                                     return (
                                         <SidebarMenuItem key={item.title}>
-                                            <SidebarMenuButton asChild className="text-lg text-[#5E6E82] hover:text-[#0186D6] focus:text-[#0186D6] active:text-[#317098] font-medium">
+                                            <SidebarMenuButton asChild className={`text-lg text-[#5E6E82] hover:text-[#0186D6] focus:text-[#0186D6] active:text-[#317098] font-medium ${isActive(item.url) ? 'text-[#0186D6]' : ''}`}>
                                                 <div className="gap-4 cursor-pointer" onClick={() => navigate(item.url)}>
-                                                    <item.icon style={{ width: '19px', height: '19px' }} className="color-icons" />
-                                                    <span className="color-icons">{item.title}</span>
+                                                    <item.icon style={{ width: '19px', height: '19px' }} />
+                                                    <span >{item.title}</span>
                                                 </div>
                                             </SidebarMenuButton>
                                         </SidebarMenuItem>

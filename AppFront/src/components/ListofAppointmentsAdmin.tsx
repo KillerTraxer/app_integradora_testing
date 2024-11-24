@@ -5,7 +5,6 @@ import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import 'dayjs/locale/es'
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter"
-import useAuthStore from "@/store/authStore";
 import { useNavigate } from "react-router-dom";
 
 dayjs.extend(utc)
@@ -15,7 +14,6 @@ dayjs.locale('es')
 
 export default function ListOfAppointmentsAdmin() {
     const { data: citas, isLoading: isLoadingCitas } = useFetchData("/citas", null);
-    const { theme } = useAuthStore();
     const navigate = useNavigate();
 
     let events = [] as any;
@@ -24,7 +22,7 @@ export default function ListOfAppointmentsAdmin() {
         const today = new Date();
 
         events = citas
-            .filter((cita: any) => dayjs(cita.fecha).isSameOrAfter(today, "day") && cita.status !== 'sin realizar' && cita.status !== 'realizada')
+            .filter((cita: any) => dayjs(cita.fecha).isSameOrAfter(today, "day") && cita.status !== 'sin realizar' && cita.status !== 'realizada' && cita.status !== 'cancelada')
             .map((cita: any) => ({
                 id: cita._id,
                 title: cita.motivo,
@@ -116,14 +114,6 @@ export default function ListOfAppointmentsAdmin() {
         )
     }
 
-    if (isLoadingCitas) {
-        return (
-            <div className="flex items-center justify-center h-screen">
-                <Spinner size='lg' />
-            </div>
-        );
-    }
-
     return (
         <Card className="card-bg md:row-span-2">
             <CardHeader className="mt-2">
@@ -131,7 +121,13 @@ export default function ListOfAppointmentsAdmin() {
             </CardHeader>
             <CardBody>
                 <div className="h-[calc(100vh-16rem)] overflow-y-auto pr-1">
-                    {events.length > 0 ? <EventList /> : <p>No hay citas programadas.</p>}
+                    {isLoadingCitas ? (
+                        <div className="flex items-center justify-center">
+                            <Spinner size='lg' />
+                        </div>
+                    ) : (
+                        events.length > 0 ? <EventList /> : <p>No hay citas programadas.</p>
+                    )}
                 </div>
             </CardBody>
         </Card>

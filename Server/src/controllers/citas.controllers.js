@@ -7,7 +7,7 @@ const { firestore, admin } = firebaseAdmin;
 
 export async function countCitas(req, res) {
     try {
-        const total = await Citas.countDocuments().exec(); // Contar el número de citas
+        const total = await Citas.countDocuments().exec();
         res.json({ total });
     } catch (error) {
         console.log(error);
@@ -71,17 +71,9 @@ export const postCita = async (req, res) => {
         const dentistaRef = firestore.collection('dentistas').doc(dentistaId);
         const dentistaDoc = await dentistaRef.get();
 
-        const fcmToken = dentistaDoc.data().fcmToken;
+        const fcmTokens = dentistaDoc.get('fcmTokens') || [];
 
         const fechaFormateada = dayjs(fecha).locale('es').format('D [de] MMMM [del] YYYY [a las] h:mm A');
-
-        const message = {
-            notification: {
-                title: "Nueva cita",
-                body: `Se ha agendado una nueva cita para el día ${fechaFormateada}`,
-            },
-            token: fcmToken,
-        };
 
         const notification = {
             title: "Nueva cita",
@@ -95,15 +87,27 @@ export const postCita = async (req, res) => {
 
         await firestore.collection("notificaciones").add(notification);
 
-        admin.messaging().send(message)
-            .then((response) => {
-                console.log('Successfully sent message:', response);
-            })
-            .catch((error) => {
-                console.log('Error sending message:', error);
-            });
+        if (fcmTokens.length > 0) {
+            fcmTokens.forEach((token) => {
+                const message = {
+                    notification: {
+                        title: "Nueva cita",
+                        body: `Se ha agendado una nueva cita para el día ${fechaFormateada}`,
+                    },
+                    token: token,
+                };
 
-        res.json({ "message": "Realizado con exito" });
+                admin.messaging().send(message)
+                    .then((response) => {
+                        console.log('Successfully sent message:', response);
+                    })
+                    .catch((error) => {
+                        console.log('Error sending message:', error);
+                    });
+            })
+        }
+
+        res.json({ "message": "Realizado con éxito" });
     } catch (error) {
         console.log(error);
     }
@@ -123,13 +127,214 @@ export const putCita = async (req, res) => {
     }
 }
 
+export const patchCita = async (req, res) => {
+    try {
+        const cita = await Citas.findByIdAndUpdate(req.params.id, req.body, {
+            new: true
+        })
+
+        if (!cita) return res.json({ "message": "No existe la cita" });
+
+        const pacienteId = cita.paciente.toString();
+        const dentistaId = cita.dentista.toString();
+
+        const pacienteRef = firestore.collection('pacientes').doc(pacienteId);
+        const pacienteDoc = await pacienteRef.get();
+        const pacienteTokens = pacienteDoc.get('fcmTokens') || [];
+
+        const dentistaRef = firestore.collection('dentistas').doc(dentistaId);
+        const dentistaDoc = await dentistaRef.get();
+        const dentistaTokens = dentistaDoc.get('fcmTokens') || [];
+
+        if (req.body.cambiadaPor === 'dentista') {
+            // Envía la notificación al paciente
+            if (pacienteTokens.length > 0) {
+                pacienteTokens.forEach((token) => {
+                    console.log(token);
+                    const message = {
+                        notification: {
+                            title: "Cita actualizada",
+                            body: `La cita del día ${cita.fecha} ha sido actualizada`,
+                        },
+                        token: token,
+                    };
+
+                    admin.messaging().send(message)
+                        .then((response) => {
+                            console.log('Successfully sent message:', response);
+                        })
+                        .catch((error) => {
+                            console.log('Error sending message:', error);
+                        });
+                });
+            }
+
+            const fechaFormateada = dayjs(req.body.fecha).locale('es').format('D [de] MMMM [del] YYYY [a las] h:mm A');
+
+            // Guarda la notificación en la colección de notificaciones del paciente
+            const notification = {
+                title: "Cita actualizada",
+                content: `ha actualizado la cita para el día ${fechaFormateada}`,
+                date: new Date(),
+                status: "new",
+                cita: cita._id.toString(),
+                usuario: pacienteId,
+                nombre: dentistaDoc.get('nombre')
+            };
+
+            await firestore.collection("notificaciones").add(notification);
+        } else if (req.body.cambiadaPor === 'paciente') {
+            // Envía la notificación al dentista
+            if (dentistaTokens.length > 0) {
+                dentistaTokens.forEach((token) => {
+                    const message = {
+                        notification: {
+                            title: "Cita actualizada",
+                            body: `La cita del día ${cita.fecha} ha sido actualizada`,
+                        },
+                        token: token,
+                    };
+
+                    admin.messaging().send(message)
+                        .then((response) => {
+                            console.log('Successfully sent message:', response);
+                        })
+                        .catch((error) => {
+                            console.log('Error sending message:', error);
+                        });
+                });
+            }
+
+            const fechaFormateada = dayjs(req.body.fecha).locale('es').format('D [de] MMMM [del] YYYY [a las] h:mm A');
+
+            const notification = {
+                title: "Cita actualizada",
+                content: `ha actualizado la cita para el día ${fechaFormateada}`,
+                date: new Date(),
+                status: "new",
+                cita: cita._id.toString(),
+                usuario: dentistaId,
+                nombre: pacienteDoc.get('nombre')
+            };
+
+            await firestore.collection("notificaciones").add(notification);
+        }
+
+        res.json({ "message": "Realizado con exito" });
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 export const deleteCita = async (req, res) => {
     try {
         const cita = await Citas.findByIdAndDelete(req.params.id, req.body, {
             new: true
         })
         if (!cita) return res.json({ "message": "No existe esa cita" });
-        
+
+        res.json({ "message": "Realizado con exito" });
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+export const changeStatusCita = async (req, res) => {
+    try {
+        const cita = await Citas.findByIdAndUpdate(req.params.id, req.body, {
+            new: true
+        });
+
+        if (!cita) return res.json({ "message": "No existe la cita" });
+
+        const pacienteId = cita.paciente.toString();
+        const dentistaId = cita.dentista.toString();
+
+        const pacienteRef = firestore.collection('pacientes').doc(pacienteId);
+        const pacienteDoc = await pacienteRef.get();
+        const pacienteTokens = pacienteDoc.get('fcmTokens') || [];
+
+        const dentistaRef = firestore.collection('dentistas').doc(dentistaId);
+        const dentistaDoc = await dentistaRef.get();
+        const dentistaTokens = dentistaDoc.get('fcmTokens') || [];
+
+        // Envía la notificación al paciente o dentista correspondiente
+        if (req.body.status === 'cancelada') {
+            if (req.body.canceladoPor === 'dentista') {
+                // Envía la notificación al paciente
+                if (pacienteTokens.length > 0) {
+                    pacienteTokens.forEach((token) => {
+                        console.log(token);
+                        const message = {
+                            notification: {
+                                title: "Cita cancelada",
+                                body: `La cita del día ${cita.fecha} ha sido cancelada`,
+                            },
+                            token: token,
+                        };
+
+                        admin.messaging().send(message)
+                            .then((response) => {
+                                console.log('Successfully sent message:', response);
+                            })
+                            .catch((error) => {
+                                console.log('Error sending message:', error);
+                            });
+                    });
+                }
+
+                const fechaFormateada = dayjs(cita.fecha).locale('es').format('D [de] MMMM [del] YYYY [a las] h:mm A');
+
+                // Guarda la notificación en la colección de notificaciones del paciente
+                const notification = {
+                    title: "Cita cancelada",
+                    content: `ha cancelado una cita para el día ${fechaFormateada}`,
+                    date: new Date(),
+                    status: "new",
+                    cita: cita._id.toString(),
+                    usuario: pacienteId,
+                    nombre: dentistaDoc.get('nombre')
+                };
+
+                await firestore.collection("notificaciones").add(notification);
+            } else if (req.body.canceladoPor === 'paciente') {
+                // Envía la notificación al dentista
+                if (dentistaTokens.length > 0) {
+                    dentistaTokens.forEach((token) => {
+                        const message = {
+                            notification: {
+                                title: "Cita cancelada",
+                                body: `La cita del día ${cita.fecha} ha sido cancelada`,
+                            },
+                            token: token,
+                        };
+
+                        admin.messaging().send(message)
+                            .then((response) => {
+                                console.log('Successfully sent message:', response);
+                            })
+                            .catch((error) => {
+                                console.log('Error sending message:', error);
+                            });
+                    });
+                }
+
+                const fechaFormateada = dayjs(cita.fecha).locale('es').format('D [de] MMMM [del] YYYY [a las] h:mm A');
+
+                const notification = {
+                    title: "Cita cancelada",
+                    content: `ha cancelado una cita para el día ${fechaFormateada}`,
+                    date: new Date(),
+                    status: "new",
+                    cita: cita._id.toString(),
+                    usuario: dentistaId,
+                    nombre: pacienteDoc.get('nombre')
+                };
+
+                await firestore.collection("notificaciones").add(notification);
+            }
+        }
+
         res.json({ "message": "Realizado con exito" });
     } catch (error) {
         console.log(error);

@@ -18,6 +18,10 @@ const axiosInstanceWithAuth = {
         await waitForAuth();
         return instance.put(url, data, config);
     },
+    patch: async (url: string, data: any, config?: AxiosConfig) => {
+        await waitForAuth();
+        return instance.patch(url, data, config);
+    },
     delete: async (url: string, config?: AxiosConfig) => {
         await waitForAuth();
         return instance.delete(url, config);

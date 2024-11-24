@@ -319,6 +319,10 @@ route.post("/save-fcm-token", async (req, res) => {
             .status(400)
             .json({ errorFields: "Todos los campos son obligatorios" });
     }
+    
+    if (token === "undefined") {
+        return
+    }
 
     try {
         const pacienteRef = firestore.collection('pacientes').doc(userId.toString());
@@ -328,11 +332,19 @@ route.post("/save-fcm-token", async (req, res) => {
         const dentistaDoc = await dentistaRef.get();
 
         if (pacienteDoc.exists) {
-            // Si el usuario está en la colección de pacientes, asignar el token FCM
-            await pacienteRef.update({ fcmToken: token });
+            const existingTokens = pacienteDoc.get('fcmTokens') || [];
+            if (existingTokens.includes(token)) {
+                return res.json({ message: "Token FCM ya guardado" });
+            }
+            existingTokens.push(token);
+            await pacienteRef.update({ fcmTokens: existingTokens });
         } else if (dentistaDoc.exists) {
-            // Si el usuario está en la colección de dentistas, asignar el token FCM
-            await dentistaRef.update({ fcmToken: token });
+            const existingTokens = dentistaDoc.get('fcmTokens') || [];
+            if (existingTokens.includes(token)) {
+                return res.json({ message: "Token FCM ya guardado" });
+            }
+            existingTokens.push(token);
+            await dentistaRef.update({ fcmTokens: existingTokens });
         }
 
         res.json({ message: "Token FCM guardado correctamente" });

@@ -1,8 +1,8 @@
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure, Textarea, Select, SelectItem, Avatar, Spinner, Tooltip, Chip } from "@nextui-org/react";
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, useDisclosure, Textarea, Select, SelectItem, Avatar, Spinner } from "@nextui-org/react";
 import { useState, useEffect } from 'react';
-import { Calendar, CirclePlus } from 'lucide-react'
+import { Calendar } from 'lucide-react'
 import { DatePicker, Form, ConfigProvider } from 'antd';
 import useAuthStore from "@/store/authStore"
 import useFetchData from "@/hooks/useFetchData"
@@ -13,21 +13,17 @@ import utc from 'dayjs/plugin/utc';
 
 dayjs.extend(utc);
 
-export default function ScheduleForm({ onNewAppointment }: any) {
+export default function UpdateCitaForm({ onUpdatedCita, open = false, closeModal, citaDetails }: any) {
     const [focusedField, setFocusedField] = useState<string | null>(null);
-    const [selectedDate, setSelectedDate] = useState<any>(null);
+    const [selectedDate, setSelectedDate] = useState<any>(citaDetails.fecha);
     const [loading, setLoading] = useState(false);
     const [submitStatus, setSubmitStatus] = useState<string | null>(null)
-    const { isOpen, onOpen, onOpenChange, onClose } = useDisclosure();
+    const { onClose } = useDisclosure();
     const { theme, auth } = useAuthStore();
     const { data: listaDentistas, isLoading: isLoadingDentistas } = useFetchData("/dentista", null);
-    const [dentistaId, setDentistaId] = useState(null);
+    const [dentistaId, setDentistaId] = useState(citaDetails.dentista);
     const [agendaDoc, setAgendaDoc] = useState(null);
     const [loadingAgendaDoc, setLoadingAgendaDoc] = useState(false);
-    const [newCita, setNewCita] = useState(false);
-    const [hasConfirmedAppointment, setHasConfirmedAppointment] = useState(false);
-    const [loadingHasConfirmedAppointment, setLoadingHasConfirmedAppointment] = useState(true);
-    const { data: citasForMe, isLoading: isLoadingCitasForMe } = useFetchData(`/citas/paciente/${auth?.user._id}`, null, newCita);
     const [citasConfirmadas, setCitasConfirmadas] = useState([]);
     const { data: citas, isLoading: isLoadingCitas } = useFetchData(`/citas`, null);
 
@@ -148,22 +144,11 @@ export default function ScheduleForm({ onNewAppointment }: any) {
         }
     }, [dentistaId]);
 
-    const colores = [
-        'bg-green-500',
-        'bg-orange-500',
-        'bg-purple-500',
-        'bg-yellow-500',
-        'bg-blue-200',
-        'bg-red-500',
-    ];
-
-    const colorCita = colores[Math.floor(Math.random() * colores.length)];
-
     const formik = useFormik({
         initialValues: {
-            fecha: '',
-            motivo: '',
-            dentista: '',
+            fecha: citaDetails.fecha,
+            motivo: citaDetails.motivo,
+            dentista: citaDetails.dentista,
         },
         validationSchema: Yup.object({
             fecha: Yup.string().required('La fecha es requerida'),
@@ -175,21 +160,21 @@ export default function ScheduleForm({ onNewAppointment }: any) {
             setSubmitStatus(null);
 
             try {
-                await axiosInstanceWithAuth.post(`/citas/${auth?.user._id}`, {
+                await axiosInstanceWithAuth.patch(`/citas/update/${citaDetails._id}`, {
                     dentistaId: values.dentista,
                     fecha: selectedDate,
                     motivo: values.motivo,
                     status: 'confirmada',
-                    colorCita
+                    cambiadaPor: auth?.user.rol
                 });
 
                 setSelectedDate(null);
                 formik.resetForm();
 
                 onClose();
-                toastSuccess({ message: 'Cita agendada exitosamente' });
-                onNewAppointment();
-                setNewCita(true);
+                closeModal();
+                toastSuccess({ message: 'Cita actualizada exitosamente' });
+                onUpdatedCita();
             } catch (error: any) {
                 if (error.response && error.response.status === 400) {
                     const { errors } = error.response.data;
@@ -203,7 +188,6 @@ export default function ScheduleForm({ onNewAppointment }: any) {
             }
         },
     });
-
 
     const getInputColor = (fieldName: string) => {
         if (focusedField === fieldName) {
@@ -220,82 +204,49 @@ export default function ScheduleForm({ onNewAppointment }: any) {
                 colorText: theme === 'dark' ? '#fff' : '#000000',
                 colorTextPlaceholder: theme === 'dark' ? '#9ca3af' : '#6b7280',
                 cellHoverBg: theme === "dark" ? '#1f1f1f' : "#f5f5f5",
-                controlItemBgActive: theme === "dark" ? '#3b3b42' : '#e6f4ff', // Color de fondo cuando está seleccionado
-                colorIcon: theme === "dark" ? "#fff" : "#a9a9a9", // Color de los iconos (flechas)
-                colorIconHover: theme === "dark" ? "#fff" : "#1f1f1f", // Color de los iconos en hover
-                colorTextHeading: theme === "dark" ? "#fff" : '#1f1f1f', // Color del texto del encabezado (mes/año)
+                controlItemBgActive: theme === "dark" ? '#3b3b42' : '#e6f4ff',
+                colorIcon: theme === "dark" ? "#fff" : "#a9a9a9",
+                colorIconHover: theme === "dark" ? "#fff" : "#1f1f1f",
+                colorTextHeading: theme === "dark" ? "#fff" : '#1f1f1f',
             },
         },
     };
 
     useEffect(() => {
-        const checkHasConfirmedAppointment = async () => {
-            setLoadingHasConfirmedAppointment(true);
-            try {
-                const hasConfirmed = !isLoadingCitasForMe && citasForMe !== null && citasForMe.length > 0 && citasForMe.some((cita: any) => cita.status === 'confirmada');
-                setHasConfirmedAppointment(hasConfirmed);
-            } catch (error) {
-                console.error(error);
-            } finally {
-                setLoadingHasConfirmedAppointment(false);
+        if (citaDetails.dentista && listaDentistas) {
+            const existingDentist = listaDentistas.find((dentista: any) => dentista._id === citaDetails.dentista);
+            if (existingDentist) {
+                setDentistaId(existingDentist._id);
             }
-        };
-        checkHasConfirmedAppointment();
-    }, [citasForMe, isLoadingCitasForMe]);
-
-    console.log(selectedDate)
+        }
+    }, [citaDetails.dentista, listaDentistas]);
 
     return (
         <>
-            {loadingHasConfirmedAppointment ? (
-                <Spinner />
-            ) : (
-                hasConfirmedAppointment ? (
-                    <Tooltip content="No puedes agendar una cita si ya tienes una confirmada" placement="right" showArrow={true} color="primary">
-                        <Chip
-                            variant="flat"
-                            className={`${theme === "dark" ? "bg-[#0f213b] text-[#536d8e] hover:bg-[#0f213b]" : "bg-[#d5e4f8] text-[#769bc6] hover:bg-[#d5e4f8]"} mb-5 flex cursor-default justify-center gap-3 px-9 py-5 font-semibold rounded-lg text-base`}
-                            startContent={<CirclePlus className={`${theme === 'dark' ? 'text-[#536d8e]' : 'text-[#769bc6]'}`} />}
-                        >
-                            Agendar cita
-                        </Chip>
-                    </Tooltip>
-                ) : (
-                    <Button
-                        className="w-52 mb-5 flex justify-center gap-3 px-3 font-semibold rounded-lg text-base"
-                        variant="flat"
-                        color='primary'
-                        startContent={<CirclePlus />}
-                        onPress={onOpen}
-                    >
-                        Agendar cita
-                    </Button>
-                )
-            )}
-
             <Modal
                 backdrop="blur"
-                isOpen={isOpen}
-                onOpenChange={onOpenChange}
+                isOpen={open}
+                // onOpenChange={}
                 className="card-bg"
                 hideCloseButton
                 size="xl"
                 placement='center'
                 onClose={() => {
                     onClose();
-                    formik.resetForm();
-                    setSubmitStatus(null);
-                    setAgendaDoc(null);
-                    setDentistaId(null);
-                    setFocusedField(null);
-                    setSelectedDate(null);
+                    // formik.resetForm();
+                    // setSubmitStatus(null);
+                    // setAgendaDoc(null);
+                    // setDentistaId(null);
+                    // setFocusedField(null);
+                    // setSelectedDate(null);
+                    closeModal();
                 }}
                 isDismissable={!loading}
             >
                 <ModalContent>
                     {(onClose) => (
                         <>
-                            <ModalHeader>Agendar cita</ModalHeader>
+                            <ModalHeader>Modificar cita</ModalHeader>
                             <ModalBody>
                                 {submitStatus && (
                                     <p className={`${theme === "dark" ? "bg-[#3b1d36]" : "bg-[#fdd0df]"} p-3 rounded-md mb-4`} style={{ color: theme === "dark" ? "#ef4444" : "#68102e" }}>
@@ -306,16 +257,22 @@ export default function ScheduleForm({ onNewAppointment }: any) {
                                 <form onSubmit={formik.handleSubmit}>
                                     <div className="space-y-4">
                                         <Select
+                                            defaultSelectedKeys={[citaDetails.dentista]}
                                             items={listaDentistas}
                                             label="Dentistas"
                                             placeholder="Elige a tu dentista"
                                             name="dentista"
                                             id='dentista'
-                                            isInvalid={formik.touched["dentista" as keyof typeof formik.touched] && !!formik.errors["dentista" as keyof typeof formik.errors]}
-                                            errorMessage={formik.touched["dentista" as keyof typeof formik.touched] && formik.errors["dentista" as keyof typeof formik.errors]}
+                                            isInvalid={formik.touched["dentista"] && !!formik.errors["dentista"]}
+                                            //@ts-ignore
+                                            errorMessage={formik.touched["dentista"] && formik.errors["dentista"]}
                                             color={getInputColor('dentista')}
-                                            value={formik.values.dentista}
-                                            onChange={formik.handleChange}
+                                            value={dentistaId} // Cambiamos esto
+                                            onChange={async (dentista: any) => {
+                                                formik.setFieldValue('dentista', dentista.value.id);
+
+                                                setDentistaId(dentista.value.id); // Aseguramos que el estado local esté actualizado
+                                            }}
                                             onBlur={(e) => {
                                                 formik.handleBlur(e);
                                                 setFocusedField(null);
@@ -396,7 +353,7 @@ export default function ScheduleForm({ onNewAppointment }: any) {
                                                     <Spinner />
                                                 ) : (
                                                     <DatePicker
-                                                        value={selectedDate}
+                                                        defaultValue={dayjs(citaDetails.fecha)}
                                                         disabled={agendaDoc === null ? true : false}
                                                         showTime={{ format: 'HH:mm' }}
                                                         onChange={(dateString: any) => {
@@ -424,6 +381,7 @@ export default function ScheduleForm({ onNewAppointment }: any) {
                                         </ConfigProvider>
 
                                         {formik.errors.fecha && (
+                                            //@ts-ignore
                                             <p className='text-xs' style={{ color: "#f31260" }}>{formik.errors.fecha}</p>
                                         )}
 
@@ -447,17 +405,18 @@ export default function ScheduleForm({ onNewAppointment }: any) {
                                             color={getInputColor("motivo")}
                                             onFocus={() => setFocusedField('motivo')}
                                             isInvalid={formik.touched["motivo" as keyof typeof formik.touched] && !!formik.errors["motivo" as keyof typeof formik.errors]}
+                                            //@ts-ignore
                                             errorMessage={formik.touched["motivo" as keyof typeof formik.touched] && formik.errors["motivo" as keyof typeof formik.errors]}
                                         />
                                     </div>
                                 </form>
                             </ModalBody>
                             <ModalFooter>
-                                <Button className="font-semibold rounded-lg text-base" color='danger' variant='flat' onPress={() => { onClose(); formik.resetForm(); setSubmitStatus(null); setAgendaDoc(null); setDentistaId(null); setFocusedField(null); }}>
+                                <Button className="font-semibold rounded-lg text-base" color='danger' variant='flat' onPress={() => { onClose(); formik.resetForm(); setSubmitStatus(null); setFocusedField(null); }}>
                                     Cerrar
                                 </Button>
                                 <Button isLoading={loading} onPress={() => formik.handleSubmit()} className="font-semibold rounded-lg text-base" variant='flat' color='primary' type="submit">
-                                    Agendar
+                                    Guardar cambios
                                 </Button>
                             </ModalFooter>
                         </>

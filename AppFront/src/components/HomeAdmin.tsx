@@ -3,32 +3,43 @@ import Chart from "react-apexcharts";
 import { CalendarClock, UsersRound } from "lucide-react"
 import ListofAppointmentsAdmin from "@/components/ListofAppointmentsAdmin"
 import useFetchData from '@/hooks/useFetchData';
+import dayjs from "dayjs";
 
 export default function HomeAdmin() {
-    const { data: totalCitas, isLoading: isLoadingCitas } = useFetchData('/citas/count', 0);
+    const { data: totalCitas, isLoading: isLoadingCitasCount } = useFetchData('/citas/count', 0);
     const { data: totalPacientes, isLoading: isLoadingPacientes } = useFetchData('/pacientes/count', 0);
+    const { data: citas, isLoading: isLoadingCitas } = useFetchData('/citas', []);
+
+    const citasPorMes = citas?.reduce((acc: any, cita: any) => {
+        const mes = dayjs(cita.fecha).format('MMMM').charAt(0).toUpperCase() + dayjs(cita.fecha).format('MMMM').slice(1);
+        if (!acc[mes]) {
+            acc[mes] = 0;
+        }
+        acc[mes]++;
+        return acc;
+    }, {});
 
     const chartOptions = {
         chart: {
             id: 'basic-line'
         },
         xaxis: {
-            categories: ['Ene', 'Feb', 'Mar', 'Abr', 'May']
+            categories: Object.keys(citasPorMes)
         },
         colors: ['#3087fb']
     }
 
-    const chartSeries = [
-        {
-            name: 'Citas',
-            data: [10, 20, 15, 8, 7]
-        }
-    ]
+    const chartSeries = Object.keys(citasPorMes).map(mes => {
+        return {
+            name: mes,
+            data: Object.values(citasPorMes).map(value => Number(value) || null)
+        };
+    });
 
     const cardsInfo = [
         {
             title: "Total de citas",
-            total: isLoadingCitas ? <Spinner /> : totalCitas.total,
+            total: isLoadingCitasCount ? <Spinner /> : totalCitas.total,
             icon: CalendarClock
         },
         {
@@ -38,7 +49,7 @@ export default function HomeAdmin() {
         }
     ]
 
-    if (isLoadingCitas || isLoadingPacientes) {
+    if (isLoadingCitasCount || isLoadingPacientes || isLoadingCitas) {
         return (
             <div className="flex items-center justify-center h-screen">
                 <Spinner size='lg' />
@@ -61,8 +72,6 @@ export default function HomeAdmin() {
                     </div>
                 </Card>
             ))}
-            {/* Tarjeta de Total de citas */}
-
 
             {/* Tarjeta de Lista */}
             <ListofAppointmentsAdmin />

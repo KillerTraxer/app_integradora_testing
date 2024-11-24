@@ -24,7 +24,7 @@ export default function ListOfAppointmentsUser({ newAppointmentCreated, onResetN
     if (!isLoadingCitas) {
         const today = new Date();
         events = citas
-            .filter((cita: any) => dayjs(cita.fecha).isSameOrAfter(today, "day") && cita.status !== 'sin realizar' && cita.status !== 'realizada')
+            .filter((cita: any) => dayjs(cita.fecha).isSameOrAfter(today, "day") && cita.status !== 'sin realizar' && cita.status !== 'realizada' && cita.status !== 'cancelada')
             .map((cita: any) => ({
                 id: cita._id,
                 title: cita.motivo,

@@ -38,11 +38,11 @@ export default function CitasforAdmin() {
     const { data: citas, isLoading: isLoadingCitas } = useFetchData(`/citas`, null);
     const { data: pacientes, isLoading: isLoadingPacientes } = useFetchData(`/pacientes`, null);
     const [filterValue, setFilterValue] = React.useState("");
-    const [selectedKeys, setSelectedKeys] = React.useState(new Set([]));
-    const [visibleColumns, setVisibleColumns] = React.useState(new Set(INITIAL_VISIBLE_COLUMNS));
-    const [statusFilter, setStatusFilter] = React.useState("all");
+    const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set([]));
+    const [visibleColumns, setVisibleColumns] = React.useState<Selection>(new Set(INITIAL_VISIBLE_COLUMNS));
+    const [statusFilter, setStatusFilter] = React.useState<Selection>("all")
     const [rowsPerPage, setRowsPerPage] = React.useState(5);
-    const [sortDescriptor, setSortDescriptor] = React.useState({
+    const [sortDescriptor, setSortDescriptor] = React.useState<SortDescriptor>({
         column: "age",
         direction: "ascending",
     });
@@ -102,15 +102,15 @@ export default function CitasforAdmin() {
 
     const sortedItems = React.useMemo(() => {
         return [...items].sort((a, b) => {
-            const first = a[sortDescriptor.column];
-            const second = b[sortDescriptor.column];
+            //@ts-ignore
+            const first = a[sortDescriptor.column] as number;
+            //@ts-ignore
+            const second = b[sortDescriptor.column] as number;
             const cmp = first < second ? -1 : first > second ? 1 : 0;
 
             return sortDescriptor.direction === "descending" ? -cmp : cmp;
         });
     }, [sortDescriptor, items]);
-
-    console.log(pacientesConCitas);
 
     const renderCell = React.useCallback((cita: any, columnKey: React.Key) => {
         const cellValue = cita[columnKey as keyof any];
@@ -147,7 +147,7 @@ export default function CitasforAdmin() {
                             <DropdownMenu variant="shadow">
                                 <DropdownItem onClick={() => navigate(`/citas/${cita._id}`)}>Ver</DropdownItem>
                                 {/* <DropdownItem>Editar</DropdownItem> */}
-                                <DropdownItem color="danger">Eliminar</DropdownItem>
+                                {/* <DropdownItem color="danger">Eliminar</DropdownItem> */}
                             </DropdownMenu>
                         </Dropdown>
                     </div>
@@ -280,11 +280,9 @@ export default function CitasforAdmin() {
         return (
             <div className="py-2 px-2 flex justify-between items-center">
                 <span className="w-[30%] text-small text-default-400">
-                    {selectedKeys.size === 0
-                        ? `${selectedKeys.size} de ${filteredItems.length} seleccionadas`
-                        : selectedKeys.size === filteredItems.length
-                            ? "Todas las citas seleccionadas"
-                            : `${selectedKeys.size} de ${filteredItems.length} seleccionadas`}
+                    {selectedKeys === "all"
+                        ? "Todas los citas seleccionadas"
+                        : `${selectedKeys.size} of ${filteredItems.length} seleccionadas`}
                 </span>
                 <Pagination
                     isCompact
@@ -334,6 +332,7 @@ export default function CitasforAdmin() {
             onSelectionChange={setSelectedKeys}
             //@ts-ignore
             onSortChange={setSortDescriptor}
+            color='primary'
         >
             <TableHeader columns={headerColumns}>
                 {(column) => (

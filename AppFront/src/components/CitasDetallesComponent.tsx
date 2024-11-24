@@ -8,6 +8,18 @@ import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import 'dayjs/locale/es'
 import { useState, useEffect } from "react";
+import {
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
+import axiosInstanceWithAuth from "@/utils/axiosInstanceWithAuth";
+import toastSuccess from "@/components/ui/toastSuccess";
+import toastError from "@/components/ui/toastError";
+import UpdateCitaForm from "./UpdateCitaForm";
 
 // Extend dayjs with plugins
 dayjs.extend(utc)
@@ -20,28 +32,38 @@ export default function CitasDetallesComponent() {
     const params = useParams();
     const idCita = params.id || '';
     const { auth, theme } = useAuthStore();
-    const { data: appointmentDetails, isLoading: isLoadingDetails } = useFetchData(`/citas/${idCita}`, null, true);
+    const [refreshDetails, setRefreshDetails] = useState(false);
+    const { data: appointmentDetails, isLoading: isLoadingDetails } = useFetchData(`/citas/${idCita}`, null, refreshDetails);
     const { data: patientInfo, isLoading: isLoadingPatientInfo } = useFetchData(`/pacientes/${appointmentDetails?.paciente}`, null, undefined, !isLoadingDetails && appointmentDetails !== null);
     const { data: dentistaInfo, isLoading: isLoadingDentistaInfo } = useFetchData(`/dentista/${appointmentDetails?.dentista}`, null, undefined, !isLoadingDetails && appointmentDetails !== null);
     const [canStartAppointment, setCanStartAppointment] = useState(false);
+    const [isDialogOpen, setIsDialogOpen] = useState(false)
+    const [isLoading, setIsLoading] = useState(false);
+    const [openModal, setOpenModal] = useState(false);
 
     useEffect(() => {
         if (!appointmentDetails?.fecha) {
             setCanStartAppointment(false); // Asegúrate de limpiar el estado
             return;
         }
-    
+
         const intervalId = setInterval(() => {
             const appointmentTime = dayjs(appointmentDetails.fecha);
             const currentTime = dayjs();
             const timeDiff = appointmentTime.diff(currentTime, 'minute');
-    
+
             // Actualiza el estado solo si hay cambios
             setCanStartAppointment(timeDiff <= 5);
         }, 1000);
-    
+
         return () => clearInterval(intervalId);
     }, [appointmentDetails?.fecha]);
+
+    useEffect(() => {
+        if (!isLoadingDetails) {
+            setRefreshDetails(false);
+        }
+    }, [isLoadingDetails]);
 
     const getStatusColor = (status: string) => {
         switch (status) {
@@ -57,6 +79,35 @@ export default function CitasDetallesComponent() {
                 return 'primary'
         }
     }
+
+    // const handleStartAppointment = () => {
+    //     setIsDialogOpen(true)
+    // }
+
+    const handleCancelCita = async () => {
+        setIsLoading(true);
+
+        try {
+            await axiosInstanceWithAuth.patch(`/citas/${idCita}`, { status: "cancelada", canceladoPor: auth?.user.rol });
+
+            setIsDialogOpen(false);
+            setRefreshDetails(true);
+            toastSuccess({ message: 'Cita cancelada exitosamente' });
+        } catch (error) {
+            console.error('Error al cancelar la cita:', error);
+            toastError({ message: "Error al cancelar la cita", secondaryMessage: "Intente nuevamente" });
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    const handleUpdateCita = () => {
+        setRefreshDetails(true);
+    };
+
+    const handleCloseModal = () => {
+        setOpenModal(false);
+    };
 
     if (isLoadingDetails || isLoadingPatientInfo || isLoadingDentistaInfo) {
         return (
@@ -77,8 +128,8 @@ export default function CitasDetallesComponent() {
                                 appointmentDetails.status === 'cancelada' ? 'Cancelada' :
                                     appointmentDetails.status === 'sin realizar' ? 'Sin Realizar' : ''}
                     </Chip>
-                    {appointmentDetails.status !== "realizada" && (
-                        <Button isIconOnly variant="flat" className="h-8" aria-label="Editar cita">
+                    {appointmentDetails.status !== "realizada" && appointmentDetails.status !== "cancelada" && (
+                        <Button isIconOnly variant="flat" className="h-8" aria-label="Editar cita" onClick={() => setOpenModal(true)}>
                             <Edit2 className="h-4 w-4" />
                         </Button>
                     )}
@@ -116,7 +167,7 @@ export default function CitasDetallesComponent() {
                     <div>
                         <p className="text-sm font-medium text-gray-500">Hora</p>
                         <p className="text-lg font-semibold">
-                            {dayjs(appointmentDetails.fecha).format('HH:mm A')}
+                            {dayjs(appointmentDetails.fecha).format('h:mm A')}
                         </p>
                     </div>
                 </div>
@@ -136,7 +187,7 @@ export default function CitasDetallesComponent() {
 
             <div className="flex flex-row justify-between mt-14 space-x-4">
                 {appointmentDetails.status === "confirmada" && (
-                    <Button color="danger" variant="flat">Cancelar cita</Button>
+                    <Button color="danger" variant="flat" onClick={() => setIsDialogOpen(true)}>Cancelar cita</Button>
                 )}
 
                 {appointmentDetails.status === "confirmada" && auth?.user.rol === "dentista" && (
@@ -162,7 +213,27 @@ export default function CitasDetallesComponent() {
                     </div>
                 )}
             </div>
-        </>
 
+            <UpdateCitaForm onUpdatedCita={handleUpdateCita} open={openModal} closeModal={handleCloseModal} citaDetails={appointmentDetails} />
+
+            <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <AlertDialogContent className={`${theme === "dark" ? "bg-[#121e2d]" : "bg-[#fff]"} border-0`}>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Estás seguro de que quieres cancelar esta cita?</AlertDialogTitle>
+                    </AlertDialogHeader>
+                    <AlertDialogDescription>
+                        Esta acción no se puede deshacer. La cita será cancelada permanentemente.
+                    </AlertDialogDescription>
+                    <AlertDialogFooter>
+                        <Button color="primary" variant="flat" onClick={() => setIsDialogOpen(false)}>
+                            No, cancelar
+                        </Button>
+                        <Button color="danger" isLoading={isLoading} onClick={handleCancelCita}>
+                            Confirmar
+                        </Button>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </>
     )
 }

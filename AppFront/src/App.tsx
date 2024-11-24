@@ -24,11 +24,18 @@ import CitasDetallesPage from "@/pages/CitasDetallesPage"
 
 //! REGISTRO DE SERVICE WORKER
 function App() {
-  // useEffect(() => {
-  //   if ('serviceWorker' in navigator) {
-  //     navigator.serviceWorker.register('/sw.js');
-  //   }
-  // }, []);
+  useEffect(() => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/firebase-messaging-sw.js')
+        .then((registration) => {
+          console.log('Service Worker registrado con éxito:', registration);
+        })
+        .catch((error) => {
+          console.error('Error al registrar el Service Worker:', error);
+        });
+    }
+  }, []);
 
   const { setAuth, clearAuth, auth } = useAuthStore();
 
@@ -51,7 +58,16 @@ function App() {
   };
 
   useEffect(() => {
-    fetchFCMToken();
+    const pathname = window.location.pathname;
+    if (
+      pathname.includes('/home') ||
+      pathname.includes('/configuracion') ||
+      pathname.includes('/agenda') ||
+      pathname.includes('/citas') ||
+      pathname.includes('/pacientes')
+    ) {
+      fetchFCMToken();
+    }
   }, []);
 
   useEffect(() => {
@@ -60,7 +76,8 @@ function App() {
         try {
           const token = localStorage.getItem('fcmToken');
           if (token && token !== undefined) {
-            await api.post('/auth/save-fcm-token', { token, userId: auth?.user._id });
+            const response = await api.post('/auth/save-fcm-token', { token, userId: auth?.user._id });
+            console.log(response.data.message);
           }
         } catch (error) {
           console.error('Error al guardar el token FCM:', error);
