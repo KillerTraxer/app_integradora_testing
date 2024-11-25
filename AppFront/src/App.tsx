@@ -21,6 +21,7 @@ import AgendaPage from "@/pages/AgendaPage"
 import CitasPage from "@/pages/CitasPage"
 import PacientesPage from "@/pages/PacientesPage"
 import CitasDetallesPage from "@/pages/CitasDetallesPage"
+import CitaIniciadaPage from "@/pages/CitaIniciadaPage"
 
 //! REGISTRO DE SERVICE WORKER
 function App() {
@@ -114,6 +115,7 @@ function App() {
         <Route path='/agenda' element={<PrivateRoute><Layout><AgendaPage /></Layout></PrivateRoute>} />
         <Route path='/citas' element={<PrivateRoute><Layout><CitasPage /></Layout></PrivateRoute>} />
         <Route path="/citas/:id" element={<PrivateRoute><Layout><CitasDetallesPage /></Layout></PrivateRoute>} />
+        <Route path='/cita/iniciada/:id' element={<PrivateRoute><Layout><CitaIniciadaPage /></Layout></PrivateRoute>} />
         <Route path='/pacientes' element={<PrivateRoute><Layout><PacientesPage /></Layout></PrivateRoute>} />
       </Routes>
     </Router>
