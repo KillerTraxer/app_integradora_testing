@@ -21,6 +21,9 @@ app.use(express.json());
 app.use(morgan("dev"));
 app.use(cors());
 
+//*RUTA PARA REVISAR EL ESTADO DEL SERVIDOR
+app.use('/api/health', (req, res) => res.status(200).json({ message: "Server is healthy!" }));
+
 app.use('/api/auth', authRoutes);
 app.use('/api/pacientes', pacientesRoutes);
 app.use('/api/dentista', dentistaRoutes);

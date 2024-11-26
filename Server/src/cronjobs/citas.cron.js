@@ -3,44 +3,51 @@ import Citas from "../models/citas.model.js";
 import AgendaDoc from "../models/agendaDoc.model.js";
 import dayjs from 'dayjs';
 
-const actualizarEstatusCitas = () => {
-    cron.schedule('0 * * * *', async () => {
-        try {
-            const citas = await Citas.find({ status: 'confirmada' });
+const actualizarEstatusCitas = async () => {
+    // Código para ejecutar inmediatamente al iniciar el servidor
+    await ejecutarLogicaDeCron();
 
-            for (const cita of citas) {
-                const fechaActual = dayjs();
-                const fechaCita = dayjs(cita.fecha);
+    // Luego programa el cron job regular
+    cron.schedule('0 * * * *', ejecutarLogicaDeCron);
+};
 
-                const siguienteCita = await Citas.findOne({
-                    // dentista: cita.dentista,
-                    fecha: { $gt: cita.fecha }
-                }).sort({ fecha: 1 });
+const ejecutarLogicaDeCron = async () => {
 
-                if (siguienteCita) {
-                    const fechaSiguienteCita = dayjs(siguienteCita.fecha);
+    try {
+        const citas = await Citas.find({ status: 'confirmada' });
 
-                    if (fechaActual.isAfter(fechaSiguienteCita) && fechaActual.isAfter(fechaCita)) {
-                        await Citas.findByIdAndUpdate(cita._id, { status: 'sin realizar' });
-                        console.log('Estatus actualizado');
-                    }
-                } else {
-                    const dentista = await AgendaDoc.findOne({ dentista: cita.dentista });
+        for (const cita of citas) {
+            const fechaActual = dayjs();
+            const fechaCita = dayjs(cita.fecha);
 
-                    const [horaFin, minutoFin] = dentista.horario.fin.split(':');
-                    const horaFinDayjs = fechaCita.hour(horaFin).minute(minutoFin).second(0);
+            const siguienteCita = await Citas.findOne({
+                // dentista: cita.dentista,
+                fecha: { $gt: cita.fecha }
+            }).sort({ fecha: 1 });
 
-                    if (fechaActual.isAfter(fechaCita) && fechaActual.isAfter(horaFinDayjs)) {
-                        await Citas.findByIdAndUpdate(cita._id, { status: 'sin realizar' });
-                        console.log(`Cita ${cita._id} marcada como "sin realizar" por horario de cierre.`);
+            if (siguienteCita) {
+                const fechaSiguienteCita = dayjs(siguienteCita.fecha);
 
-                    }
+                if (fechaActual.isAfter(fechaSiguienteCita) && fechaActual.isAfter(fechaCita)) {
+                    await Citas.findByIdAndUpdate(cita._id, { status: 'sin realizar' });
+                    console.log('Estatus actualizado');
+                }
+            } else {
+                const dentista = await AgendaDoc.findOne({ dentista: cita.dentista });
+
+                const [horaFin, minutoFin] = dentista.horario.fin.split(':');
+                const horaFinDayjs = fechaCita.hour(horaFin).minute(minutoFin).second(0);
+
+                if (fechaActual.isAfter(fechaCita) && fechaActual.isAfter(horaFinDayjs)) {
+                    await Citas.findByIdAndUpdate(cita._id, { status: 'sin realizar' });
+                    console.log(`Cita ${cita._id} marcada como "sin realizar" por horario de cierre.`);
+
                 }
             }
-        } catch (error) {
-            console.log(error);
         }
-    });
+    } catch (error) {
+        console.log(error);
+    }
 }
 
 export default actualizarEstatusCitas;
