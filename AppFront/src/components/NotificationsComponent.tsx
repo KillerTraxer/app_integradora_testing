@@ -101,14 +101,13 @@ export default function NotificationsComponent() {
             </DropdownTrigger>
 
             <DropdownMenu aria-label="Profile Actions" variant="flat" className="w-80">
-                <DropdownItem className="flex flex-row justify-between" variant="faded">
+                <DropdownItem className="flex flex-row justify-between mb-2 cursor-default" disableAnimation isReadOnly>
                     <div className="flex flex-row justify-between gap-8">
                         <p className="font-bold">Notificaciones</p>
-                        {/* <p className="font-base text-primary">Marcar como leidas</p> */}
                     </div>
                 </DropdownItem>
 
-                <DropdownSection className="overflow-y-visible overflow-x-hidden max-h-36">
+                <DropdownSection className="overflow-y-visible overflow-x-hidden max-h-64">
                     {notifications.length === 0 ? (
                         <DropdownItem className="h-auto gap-2" showDivider>
                             <div className="flex flex-row gap-4 justify-center">
@@ -138,9 +137,6 @@ export default function NotificationsComponent() {
                         ))
                     )}
                 </DropdownSection>
-                <DropdownItem key="seeAll" className="h-10 text-center" color="primary">
-                    <p className="font-semibold">Ver todas</p>
-                </DropdownItem>
             </DropdownMenu>
         </Dropdown>
     )

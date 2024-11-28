@@ -226,7 +226,7 @@ export default function AgendaPage() {
         [setEvents]
     );
 
-    if (isLoadingAgenda && agendaLoaded) {
+    if (isLoadingAgenda) {
         return (
             <div className="flex items-center justify-center h-screen">
                 <Spinner size='lg' />
