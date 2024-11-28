@@ -1,7 +1,6 @@
 import { useState } from "react"
 import { Avatar, Button, Tooltip, Spinner } from "@nextui-org/react";
 import { Camera, X } from "lucide-react";
-import useAuthStore from "@/store/authStore";
 
 export default function ChangeImgComponent() {
     const [avatarUrl, setAvatarUrl] = useState("/placeholder.svg?height=100&width=100")

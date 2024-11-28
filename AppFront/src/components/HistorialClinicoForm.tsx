@@ -56,6 +56,8 @@ export default function HistorialClinicoForm({ pacienteInfo, onHide, motivo }: a
     const [teeth, setTeeth] = useState<ToothData[]>(initialTeethData);
     const [diagnostico, setDiagnostico] = useState('');
 
+    console.log(loading, submitStatus);
+
     const handleGenderChange = (value: string[]) => {
         setSelectedGender(value[0] || null);
     };
@@ -129,6 +131,8 @@ export default function HistorialClinicoForm({ pacienteInfo, onHide, motivo }: a
             fechaNacimiento: Yup.date().required('La fecha de nacimiento es requerida'),
             phone: Yup.string().matches(/^\d{10}$/, 'El teléfono debe tener 10 dígitos').required('El teléfono es requerido'),
         }),
+
+        //@ts-ignore
         onSubmit: async (values) => {
             setLoading(true);
             setSubmitStatus(null);
