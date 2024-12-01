@@ -77,8 +77,7 @@ function App() {
         try {
           const token = localStorage.getItem('fcmToken');
           if (token && token !== undefined) {
-            const response = await api.post('/auth/save-fcm-token', { token, userId: auth?.user._id });
-            console.log(response.data.message);
+            await api.post('/auth/save-fcm-token', { token, userId: auth?.user._id });
           }
         } catch (error) {
           console.error('Error al guardar el token FCM:', error);

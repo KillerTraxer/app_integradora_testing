@@ -20,6 +20,7 @@ import axiosInstanceWithAuth from "@/utils/axiosInstanceWithAuth";
 import toastSuccess from "@/components/ui/toastSuccess";
 import toastError from "@/components/ui/toastError";
 import UpdateCitaForm from "./UpdateCitaForm";
+import { useNavigate } from "react-router-dom";
 
 // Extend dayjs with plugins
 dayjs.extend(utc)
@@ -40,6 +41,7 @@ export default function CitasDetallesComponent() {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
     const [isLoading, setIsLoading] = useState(false);
     const [openModal, setOpenModal] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (!appointmentDetails?.fecha) {
@@ -197,6 +199,7 @@ export default function CitasDetallesComponent() {
                                 color="primary"
                                 variant="flat"
                                 isDisabled={false}
+                                onClick={() => navigate(`/cita/iniciada/${appointmentDetails._id}`)}
                             >
                                 Iniciar Cita
                             </Button>
@@ -205,6 +208,7 @@ export default function CitasDetallesComponent() {
                                 <Chip
                                     variant="flat"
                                     className={`${theme === "dark" ? "bg-[#0f213b] text-[#536d8e] hover:bg-[#0f213b]" : "bg-[#d5e4f8] text-[#769bc6] hover:bg-[#d5e4f8]"} mb-5 flex cursor-default justify-center gap-3 py-5 font-semibold rounded-xl text-base`}
+                                    onClick={() => navigate(`/cita/iniciada/${appointmentDetails._id}`)}
                                 >
                                     Iniciar Cita
                                 </Chip>

@@ -1,274 +1,84 @@
 import mongoose from "mongoose";
 
 const historiasClinicasSchema = mongoose.Schema({
-    fecha: {
-        type: Date,
+    paciente: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'pacientes',
         require: true
     },
-    inicio_tratamiento: {
-        type: Date,
-        require: true
-    },
-    fin_tratamiento: {
-        type: Date,
-        require: true 
-    },
-    nombre_paciente: {
+    nombreCompleto: {
         type: String,
-        require: true
-    },
-    domicilio: {
-        type: String,
-        require: true 
-    },
-    telefono: {
-        type: String,
-        require: true
-    },
-    ocupacion: {
-        type: String,
-        require: true
+        require: true,
+        trim: true
     },
     edad: {
         type: String,
-        require: true
+        require: true,
+        trim: true
     },
-    sexo: {
+    genero: {
         type: String,
-        require: true
+        require: true,
+        trim: true
     },
-    bajo_tratamiento: {
-        si: {
-            type: Boolean
-        },
-        no: {
-            type: Boolean
-        }
-    },
-    color: {
+    fechaNacimiento: {
         type: String,
-        require: true
+        require: true,
+        trim: true
     },
-    motivo_consulta: {
-        emergencia: {
-            type: Boolean,
-            require: true 
-        },
-        revision: {
-            type: Boolean,
-            require: true 
-        },
-        lesion_catres: {
-            type: Boolean,
-            require: true
-        },
-        odontoxsesis: {
-            type: Boolean,
-            require: true 
-        },
-        puente: {
-            type: Boolean,
-            require: true 
-        },
-        prostodoncia: {
-            type: Boolean,
-            require: true  
-        },
-        extraccion: {
-            type: Boolean,
-            require: true
-        }
-    },
-    habitos: {
-        bricomania: {
-            type: Boolean,
-            require: true 
-        },
-        contracciones_musculares: {
-            type: Boolean,
-            require: true 
-        },
-        mordida: {
-            type: Boolean,
-            require: true 
-        },
-        respiracion_bucal: {
-            type: Boolean,
-            require: true 
-        },
-    },
-    chupadores_de: {
-        labios: {
-            type: Boolean,
-            require: true 
-        },
-        lengua :{
-            type: Boolean,
-            require: true
-        },
-        dedos: {
-            type: Boolean,
-            require: true
-        }
-    },
-    higiene_bucal: {
+    direccion: {
         type: String,
-        require: true 
+        require: true,
+        trim: true
     },
-    alergias: {
+    localidad: {
         type: String,
-        require: true 
+        require: true,
+        trim: true
     },
-    alimentacion: {
+    ocupacion: {
         type: String,
-        require: true 
+        require: true,
+        trim: true
     },
-    examen_tejidos: {
-        oclusion: {
-            esmalte: {
-                type: Boolean,
-                require: true
-            },
-            dentina: {
-                type: Boolean,
-                require: true
-            },
-            raiz: {
-                type: Boolean,
-                require: true
-            },
-            huesos: {
-                type: Boolean,
-                require: true
-            }
-        },
-        oclusion: {
-            encia: {
-                type: Boolean,
-                require: true
-            },
-            epitelial: {
-                type: Boolean,
-                require: true
-            },
-            pulpa: {
-                type: Boolean,
-                require: true
-            },
-            velo_paladar: {
-                type: Boolean,
-                require: true
-            },
-            carrillos: {
-                type: Boolean,
-                require: true
-            },
-            insercion: {
-                type: Boolean,
-                require: true
-            }
-        },
-        oclusion: {
-            sobre_mordida_vertical: {
-                type: Boolean,
-                require: true
-            },
-            mordida_abierta: {
-                type: Boolean,
-                require: true
-            },
-            desgaste: {
-                type: Boolean,
-                require: true
-            },
-            intercuspideo: {
-                type: Boolean,
-                require: true
-            },
-            desmayos: {
-                type: Boolean,
-                require: true
-            },
-            vertigos: {
-                type: Boolean,
-                require: true
-            },
-            anoclusion: {
-                type: Boolean,
-                require: true
-            },
-            mareos: {
-                type: Boolean,
-                require: true
-            },
-            otros: {
-                type: Boolean,
-                require: true
-            },
-            meses_embarazo: {
-                type: String,
-                require: true  
-            }
-        }
-    },
-    enfermedades: {
-        aparato_cardiovascular: {
-            type: Boolean,
-            require: true
-        },
-        sistema_nervioso: {
-            type: Boolean,
-            require: true
-        },
-        aparato_respiratorio: {
-            type: Boolean,
-            require: true
-        },
-        propension_hemorragica: {
-            type: Boolean,
-            require: true
-        },
-        pruebas_lab: {
-            type: Boolean,
-            require: true
-        },
-        estudio_radiologico: {
-            type: Boolean,
-            require: true
-        },
-        renal: {
-            type: Boolean,
-            require: true
-        },
-        digestivo: {
-            type: Boolean,
-            require: true
-        },
-        diabetes: {
-            type: Boolean,
-            require: true
-        },
-        artritis: {
-            type: Boolean,
-            require: true
-        },
-        estado_gral: {
-            type: String,
-            require: true
-        }
-    },
-    observaciones: {
+    phone: {
         type: String,
-        require: true
+        require: true,
+        trim: true
     },
-    dentincion_permanente: {
-        type: Boolean,
-        require: true
+    email: {
+        type: String,
+        require: true,
+        trim: true
     },
-    temporal: {
-        type: Boolean,
-        require: true
-    }
+    diagnostico: {
+        type: String,
+        require: true,
+        trim: true
+    },
+    diseases: {
+        type: Object,
+        default: {}
+    },
+    otherDiseases: {
+        type: String
+    },
+    odontogram: {
+        type: Array,
+        default: []
+    },
+    extraOralExam: {
+        head: String,
+        face: String,
+        atm: String,
+        ganglios: String,
+        lips: String
+    },
+    treatments: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'tratamientos',
+        require: false
+    }]
 })
 
 export default mongoose.model('historiasClinica', historiasClinicasSchema);

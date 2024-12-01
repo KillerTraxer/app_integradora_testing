@@ -16,7 +16,7 @@ export default function toastError({ message, secondaryMessage }: { message: str
             icon: <CircleX size={30} />,
             position: "bottom-right",
             style: {
-                backgroundColor: '#ef4444',
+                backgroundColor: '#a13c4f',
             }
         }
     )

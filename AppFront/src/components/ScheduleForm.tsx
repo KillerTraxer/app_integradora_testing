@@ -243,8 +243,6 @@ export default function ScheduleForm({ onNewAppointment }: any) {
         checkHasConfirmedAppointment();
     }, [citasForMe, isLoadingCitasForMe]);
 
-    console.log(selectedDate)
-
     return (
         <>
             {loadingHasConfirmedAppointment ? (

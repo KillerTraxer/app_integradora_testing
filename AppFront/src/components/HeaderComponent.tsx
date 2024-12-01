@@ -67,7 +67,7 @@ export default function HeaderComponent() {
                             />
                         </DropdownTrigger>
                         <DropdownMenu aria-label="Profile Actions" variant="shadow" >
-                            <DropdownItem key="profile" className="h-14 gap-2">
+                            <DropdownItem key="profile" className="h-14 gap-2 cursor-default" disableAnimation isReadOnly>
                                 <p className="font-semibold">Hola!</p>
                                 <p className="font-semibold">{auth?.user.nombre}</p>
                             </DropdownItem>

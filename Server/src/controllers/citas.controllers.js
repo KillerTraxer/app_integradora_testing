@@ -340,3 +340,17 @@ export const changeStatusCita = async (req, res) => {
         console.log(error);
     }
 }
+
+export const terminarCita = async (req, res) => {
+    try {
+        const cita = await Citas.findByIdAndUpdate(req.params.id, req.body, {
+            new: true
+        })
+
+        if (!cita) return res.json({ "message": "No existe la cita" });
+
+        res.json({ "message": "Realizado con exito" });
+    } catch (error) {
+        console.log(error);
+    }
+}

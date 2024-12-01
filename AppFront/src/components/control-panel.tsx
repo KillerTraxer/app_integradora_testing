@@ -33,9 +33,9 @@ export function ControlPanel({ selectedTooth, onUpdateTooth, isOpen, onClose }: 
                             <div className="flex justify-between items-center">
                                 <span>Presente</span>
                                 <Switch
-                                    checked={selectedTooth.conditions.isPresent}
-                                    onChange={(e) =>
-                                        onUpdateTooth(selectedTooth.id, { isPresent: e.target.checked })
+                                    isSelected={selectedTooth.conditions.isPresent}
+                                    onValueChange={(isChecked) =>
+                                        onUpdateTooth(selectedTooth.id, { isPresent: isChecked })
                                     }
                                 />
                             </div>
@@ -48,10 +48,10 @@ export function ControlPanel({ selectedTooth, onUpdateTooth, isOpen, onClose }: 
                                             <span className="capitalize">{surface}</span>
                                             <Switch
                                                 size="sm"
-                                                checked={value}
-                                                onChange={(e) =>
+                                                isSelected={value}
+                                                onValueChange={(selected) =>
                                                     onUpdateTooth(selectedTooth.id, {
-                                                        caries: { ...selectedTooth.conditions.caries, [surface]: e.target.checked },
+                                                        caries: { ...selectedTooth.conditions.caries, [surface]: selected },
                                                     })
                                                 }
                                             />
@@ -63,9 +63,9 @@ export function ControlPanel({ selectedTooth, onUpdateTooth, isOpen, onClose }: 
                             <div className="flex justify-between items-center">
                                 <span>Fractura</span>
                                 <Switch
-                                    checked={selectedTooth.conditions.fracture}
-                                    onChange={(e) =>
-                                        onUpdateTooth(selectedTooth.id, { fracture: e.target.checked })
+                                    isSelected={selectedTooth.conditions.fracture}
+                                    onValueChange={(selected) =>
+                                        onUpdateTooth(selectedTooth.id, { fracture: selected })
                                     }
                                 />
                             </div>
@@ -73,9 +73,9 @@ export function ControlPanel({ selectedTooth, onUpdateTooth, isOpen, onClose }: 
                             <div className="flex justify-between items-center">
                                 <span>Mala posición</span>
                                 <Switch
-                                    checked={selectedTooth.conditions.malposition}
-                                    onChange={(e) =>
-                                        onUpdateTooth(selectedTooth.id, { malposition: e.target.checked })
+                                    isSelected={selectedTooth.conditions.malposition}
+                                    onValueChange={(selected) =>
+                                        onUpdateTooth(selectedTooth.id, { malposition: selected })
                                     }
                                 />
                             </div>

@@ -2,24 +2,19 @@ import { useState } from "react"
 import { Tooth } from "./tooth"
 import { ControlPanel } from "@/components/control-panel"
 import { ToothData } from "../types/tooth"
-import { initialTeethData } from "../utils/teeth-data"
+// import { initialTeethData } from "../utils/teeth-data"
 
-export function Odontogram() {
-    const [teeth, setTeeth] = useState<ToothData[]>(initialTeethData)
+interface OdontogramProps {
+    teeth: ToothData[];
+    onUpdateTooth: (toothId: string, updates: Partial<ToothData['conditions']>) => void;
+}
+
+export function Odontogram({ teeth, onUpdateTooth }: OdontogramProps) {
+    // const [teeth, setTeeth] = useState<ToothData[]>(initialTeethData)
     const [selectedToothId, setSelectedToothId] = useState<string | null>(null)
     const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
-    const selectedTooth = teeth.find((tooth) => tooth.id === selectedToothId) || null
-
-    const handleToothUpdate = (toothId: string, updates: Partial<ToothData['conditions']>) => {
-        setTeeth((currentTeeth) =>
-            currentTeeth.map((tooth) =>
-                tooth.id === toothId
-                    ? { ...tooth, conditions: { ...tooth.conditions, ...updates } }
-                    : tooth
-            )
-        )
-    }
+    const selectedTooth = selectedToothId ? teeth.find((tooth) => tooth.id === selectedToothId) : null
 
     const handleToothClick = (toothId: string) => {
         if (selectedToothId === toothId) {
@@ -64,8 +59,9 @@ export function Odontogram() {
             </div>
 
             <ControlPanel
+                //@ts-ignore
                 selectedTooth={selectedTooth}
-                onUpdateTooth={handleToothUpdate}
+                onUpdateTooth={onUpdateTooth}
                 isOpen={isSidebarOpen}
                 onClose={() => setIsSidebarOpen(false)}
             />

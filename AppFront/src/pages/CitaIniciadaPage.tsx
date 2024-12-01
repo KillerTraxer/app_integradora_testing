@@ -1,9 +1,13 @@
-import { User, Spinner, Button, Textarea } from "@nextui-org/react";
-import { useParams } from "react-router-dom";
+import { User, Spinner, Button, Textarea, Tooltip, Chip } from "@nextui-org/react";
+import { useParams, useNavigate } from "react-router-dom";
 import useFetchData from "@/hooks/useFetchData";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { BookHeart, ClipboardList } from "lucide-react"
 import HistorialClinicoForm from "@/components/HistorialClinicoForm";
+import TratamientoForm from "@/components/TratamientoForm";
+import useAuthStore from "@/store/authStore";
+import axiosInstanceWithAuth from "@/utils/axiosInstanceWithAuth";
+import toastSuccess from "@/components/ui/toastSuccess";
 
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
@@ -18,6 +22,7 @@ dayjs.extend(timezone)
 dayjs.locale('es')
 
 export default function CitaIniciadaPage() {
+    const { theme } = useAuthStore();
     const params = useParams();
     const idCita = params.id || '';
     const { data: appointmentDetails, isLoading: isLoadingDetails } = useFetchData(`/citas/${idCita}`, null);
@@ -25,10 +30,43 @@ export default function CitaIniciadaPage() {
     const [focusedField, setFocusedField] = useState<string | null>(null);
     const [observaciones, setObservaciones] = useState('');
     const [showHistorialForm, setShowHistorialForm] = useState(false);
+    const [showTratamientoForm, setShowTratamientoForm] = useState(false);
+    const [reload, setReload] = useState(false);
+    const { data: hasHistorial, isLoading: isLoadingHistorial } = useFetchData(`/historiasClinicas/paciente/${appointmentDetails?.paciente}`, null, reload, !isLoadingDetails && appointmentDetails !== null);
+    const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
 
     const handleHideHistorialForm = () => {
         setShowHistorialForm(false);
     };
+
+    const handleHideTratamientoForm = () => {
+        setShowTratamientoForm(false);
+    };
+
+    const handleChangeReload = () => {
+        setReload(true);
+    }
+
+    useEffect(() => {
+        if (!isLoadingDetails) {
+            setReload(false);
+        }
+    }, [isLoadingDetails]);
+
+    const terminarCita = async () => {
+        setIsLoading(true);
+        try {
+            await axiosInstanceWithAuth.patch(`/citas/terminar/${idCita}`, { status: 'realizada', observaciones: observaciones });
+            setIsLoading(false);
+            toastSuccess({ message: 'Cita terminada exitosamente' });
+            navigate(`/citas/${idCita}`);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
 
     if (isLoadingDetails || isLoadingPatientInfo) {
         return (
@@ -41,7 +79,9 @@ export default function CitaIniciadaPage() {
     return (
         <>
             {showHistorialForm ? (
-                <HistorialClinicoForm pacienteInfo={patientInfo} onHide={handleHideHistorialForm} motivo={appointmentDetails?.motivo} />
+                <HistorialClinicoForm onCreateHistorial={handleChangeReload} pacienteInfo={patientInfo} onHide={handleHideHistorialForm} motivo={appointmentDetails?.motivo} />
+            ) : showTratamientoForm ? (
+                <TratamientoForm pacienteInfo={patientInfo} onHide={handleHideTratamientoForm} />
             ) : (
                 <>
                     <div className="flex flex-row gap-3 mb-4 items-center">
@@ -67,13 +107,33 @@ export default function CitaIniciadaPage() {
                             color="primary"
                             startContent={(<div><BookHeart size={22} /></div>)}
                             onClick={() => setShowHistorialForm(true)}
+                            isLoading={isLoadingHistorial}
                         >
                             Crear historial clínico
                         </Button>
 
-                        <Button variant="flat" color="primary" startContent={(<div><ClipboardList size={22} /></div>)}>
-                            Crear tratamiento
-                        </Button>
+                        {!hasHistorial ? (
+                            <Tooltip content="No puedes crear un tratamiento sin un historial clínico." placement="right" showArrow={true} color="primary">
+                                <Chip
+                                    variant="flat"
+                                    className={`${theme === "dark" ? "bg-[#0f213b] text-[#536d8e] hover:bg-[#0f213b]" : "bg-[#d5e4f8] text-[#769bc6] hover:bg-[#d5e4f8]"} flex cursor-default justify-center gap-3 py-5 px-4 font-semibold rounded-xl text-base`}
+                                    startContent={(<div><ClipboardList size={22} /></div>)}
+                                >
+                                    Crear tratamiento
+                                </Chip>
+                            </Tooltip>
+                        ) : (
+                            <Button
+                                variant="flat"
+                                color="primary"
+                                startContent={(<div><ClipboardList size={22} /></div>)}
+                                onClick={() => setShowTratamientoForm(true)}
+                                isLoading={isLoadingHistorial}
+                            >
+                                Crear tratamiento
+                            </Button>
+                        )}
+
                     </div>
 
 
@@ -81,13 +141,14 @@ export default function CitaIniciadaPage() {
                     <Textarea
                         id='observaciones'
                         name='observaciones'
-                        label={(<p className="text-gray-400 font-light text-base">Observaciones para la cita</p>)}
+                        label={(<p className="text-gray-500 font-light text-base">Observaciones de la cita</p>)}
                         labelPlacement="outside"
                         placeholder="Escribe tus observaciones."
                         value={observaciones}
                         classNames={{
                             base: "w-full",
                             input: "resize-y min-h-[80px]",
+                            inputWrapper: "input-custom"
                         }}
                         onChange={(e) => setObservaciones(e.target.value)}
                         onBlur={() => {
@@ -98,8 +159,12 @@ export default function CitaIniciadaPage() {
                         onFocus={() => setFocusedField('observaciones')}
                     />
 
-                    <div className="flex justify-end mt-5 mb-5">
-                        <Button variant="flat" color="primary">
+                    <div className="flex flex-row justify-between mt-14 space-x-4">
+                        <Button variant="flat" color="danger" onClick={() => navigate(-1)} isLoading={isLoading}>
+                            Volver
+                        </Button>
+
+                        <Button variant="flat" color="primary" onClick={terminarCita} isLoading={isLoading}>
                             Finalizar cita
                         </Button>
                     </div>

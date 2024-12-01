@@ -4,7 +4,7 @@ import { CircleCheck } from 'lucide-react';
 export default function toastSuccess({ message }: { message: string }) {
     return toast.success(
         <div>
-            <p className='font-semibold text-base text-[#e8e8e8]'>{message}</p>
+            <p className='font-medium text-base text-[#ffffff]'>{message}</p>
         </div>,
         {
             hideProgressBar: false,
@@ -15,7 +15,7 @@ export default function toastSuccess({ message }: { message: string }) {
             icon: <CircleCheck size={30} />,
             position: "bottom-right",
             style: {
-                backgroundColor: '#22c55e',
+                backgroundColor: '#13a247',
             },
         }
     )

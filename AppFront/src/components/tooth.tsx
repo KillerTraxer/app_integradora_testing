@@ -47,4 +47,3 @@ export function Tooth({ tooth, isSelected, onClick }: ToothProps) {
         </div>
     );
 }
-

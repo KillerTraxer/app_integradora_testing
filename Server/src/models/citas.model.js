@@ -11,6 +11,11 @@ const citasSchema = mongoose.Schema({
         ref: 'dentistas',
         require: true
     },
+    tratamientoCita: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Tratamiento',
+        require: false
+    },
     fecha: {
         type: Date,
         require: true,
@@ -26,10 +31,14 @@ const citasSchema = mongoose.Schema({
         enum: ['confirmada', 'cancelada', 'realizada', 'sin realizar'],
         default: 'confirmada'
     },
+    observaciones: {
+        type: String,
+        require: false
+    },
     colorCita: {
         type: String,
         require: true
-    }
+    },
 }, {
     timestamps: true
 });
