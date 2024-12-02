@@ -31,7 +31,6 @@ export function Odontogram({ teeth, onUpdateTooth }: OdontogramProps) {
 
     return (
         <div>
-            <h2 className="text-xl font-semibold mb-4">Odontograma</h2>
             <div className="space-y-8">
                 {/* Upper teeth */}
                 <div className="flex justify-center space-x-1">

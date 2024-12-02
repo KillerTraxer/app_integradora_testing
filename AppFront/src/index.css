@@ -219,3 +219,9 @@ body {
 .dark .input-custom-out {
   background-color: #f4f4f5;
 }
+
+@media print {
+  .hidden-pdf {
+    display: none !important;
+  }
+}

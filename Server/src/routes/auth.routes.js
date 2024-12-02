@@ -319,7 +319,7 @@ route.post("/save-fcm-token", async (req, res) => {
             .status(400)
             .json({ errorFields: "Todos los campos son obligatorios" });
     }
-    
+
     if (token === "undefined") {
         return
     }
@@ -352,6 +352,35 @@ route.post("/save-fcm-token", async (req, res) => {
         console.error("Error al guardar el token FCM:", error);
         res.status(500).json({ message: "Error al guardar el token FCM." });
     }
-})
+});
+
+route.post("/send-email-paciente", async (req, res) => {
+    const { email, downloadLink } = req.body;
+
+    if (!email) {
+        return res
+            .status(400)
+            .json({ errorFields: "El email es obligatorio" });
+    }
+
+    try {
+        transporter.sendMail({
+            from: 'Dental Care <no-reply@dentalcare.com>',
+            to: email,
+            subject: `Historial Clinico`,
+            html: `
+                <div style="padding: 20px; font-family: Arial, sans-serif;">
+                    <h2>Dental Care</h2>
+                    <h1>Historial Clinico</h1>
+                    <p>Aqui esta tu historial clinico, lo puedes ver en el siguiente enlace</p>
+                    <h1>${downloadLink}</h1>
+                </div>
+            `,
+        });
+    } catch (error) {
+        console.error("Error al enviar el correo:", error);
+        return res.status(500).json({ error: "Error al enviar el correo." });
+    }
+});
 
 export default route;

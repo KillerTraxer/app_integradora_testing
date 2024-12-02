@@ -25,6 +25,20 @@ export const getTratamiento = async (req, res) => {
     }
 }
 
+export const getTratamientosByPaciente = async (req, res) => {
+    try {
+        const pacienteId = req.params.id;
+        const tratamientos = await Tratamiento.find({ paciente: pacienteId });
+
+        if (!tratamientos) return res.json({ "message": "No se encontraron tratamientos para el paciente" });
+
+        res.json(tratamientos);
+
+    } catch (error) {
+        // Manejar el error
+    }
+}
+
 export const postTratamiento = async (req, res) => {
     try {
         const { paciente, dentista, tratamientos } = req.body;

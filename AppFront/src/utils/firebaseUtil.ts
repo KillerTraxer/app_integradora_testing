@@ -26,10 +26,10 @@ const firebaseConfig2 = {
 };
 
 const app = initializeApp(firebaseConfig);
-const app2 = initializeApp(firebaseConfig2, 'miSegundaApp');
+const app2 = initializeApp(firebaseConfig2, 'proyecto-d19a8.appspot.com');
 
 const db = getFirestore(app);
-const db2 = getFirestore(app2, 'miSegundaApp');
+const db2 = getFirestore(app2, 'proyecto-d19a8.appspot.com');
 
 const messaging = getMessaging(app);
 
@@ -59,7 +59,7 @@ const onMessageListener = () => {
   })
 }
 
-const storage2 = getStorage(app2, 'miSegundaApp');
+const storage2 = getStorage(app2, 'proyecto-d19a8.appspot.com');
 
 
 export {

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button } from "@nextui-org/react"
+import { Button, Spinner } from "@nextui-org/react"
 import TratamientoGeneral from "@/components/TratamientoGeneral"
 import ConfiguracionTratamiento from "@/components/ConfiguracionTratamiento"
 import { useFormik } from 'formik'
@@ -14,25 +14,36 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 
-export default function TratamientoForm({ pacienteInfo, onHide }: any) {
+export default function TratamientoForm({ hasTreatment, pacienteInfo, onHide, onCreateTratamiento, isLoadingTreatments }: any) {
     const { auth, theme } = useAuthStore()
     const [loading, setLoading] = useState(false);
     //@ts-ignore
     const [submitStatus, setSubmitStatus] = useState<string | null>(null)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-    const [tratamientos, setTratamientos] = useState([
-        {
-            id: '1',
-            general: '',
-            fases: [{ id: '1', contenido: '' }],
-            configuracion: {
-                duracion: { valor: '', unidad: '' },
-                horaPreferida: '',
-                frecuencia: ''
-            }
-        }
-    ])
+    console.log(isLoadingTreatments)
+
+    const [tratamientos, setTratamientos] = useState(
+        hasTreatment && hasTreatment.length > 0
+            ? hasTreatment.map((tratamiento: any) => ({
+                id: tratamiento._id,
+                general: tratamiento.general,
+                fases: tratamiento.fases,
+                configuracion: tratamiento.configuracion,
+            }))
+            : [
+                {
+                    id: "1",
+                    general: "",
+                    fases: [{ id: "1", contenido: "" }],
+                    configuracion: {
+                        duracion: { valor: "", unidad: "" },
+                        horaPreferida: "",
+                        frecuencia: "",
+                    },
+                },
+            ]
+    );
 
     const agregarTratamiento = () => {
         const nuevoId = tratamientos.length + 1
@@ -49,12 +60,12 @@ export default function TratamientoForm({ pacienteInfo, onHide }: any) {
     }
 
     const eliminarTratamiento = (id: string) => {
-        const nuevosTratamientos = tratamientos.filter(t => t.id !== id)
-        setTratamientos(nuevosTratamientos.map((tratamiento, index) => ({ ...tratamiento, id: (index + 1).toString() })))
+        const nuevosTratamientos = tratamientos.filter((t: any) => t.id !== id)
+        setTratamientos(nuevosTratamientos.map((tratamiento: any, index: any) => ({ ...tratamiento, id: (index + 1).toString() })))
     }
 
     const actualizarTratamiento = (id: string, campo: string, valor: any) => {
-        setTratamientos(tratamientos.map(t =>
+        setTratamientos(tratamientos.map((t: any) =>
             t.id === id ? { ...t, [campo]: valor } : t
         ))
     }
@@ -71,7 +82,7 @@ export default function TratamientoForm({ pacienteInfo, onHide }: any) {
             setLoading(true);
             setSubmitStatus(null);
 
-            const tratamientosFormateados = tratamientos.map(tratamiento => ({
+            const tratamientosFormateados = tratamientos.map((tratamiento: any) => ({
                 ...tratamiento,
                 configuracion: {
                     ...tratamiento.configuracion,
@@ -89,6 +100,7 @@ export default function TratamientoForm({ pacienteInfo, onHide }: any) {
                 toastSuccess({ message: 'Tratamiento creado exitosamente' });
                 setIsDialogOpen(false);
                 onHide();
+                onCreateTratamiento();
             } catch (error: any) {
                 if (error.response && error.response.status === 400) {
                     const { errors } = error.response.data;
@@ -103,6 +115,14 @@ export default function TratamientoForm({ pacienteInfo, onHide }: any) {
             }
         },
     });
+
+    if (isLoadingTreatments) {
+        return (
+            <div className="flex items-center justify-center h-screen">
+                <Spinner size='lg' />
+            </div>
+        );
+    }
 
     return (
         <div className='pb-8'>

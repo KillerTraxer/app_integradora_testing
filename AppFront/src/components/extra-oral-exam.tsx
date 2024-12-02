@@ -17,6 +17,10 @@ export function ExtraOralExamForm({ exam, onChange }: ExtraOralExamFormProps) {
                         size="sm"
                         value={exam.head}
                         onChange={(e) => onChange({ head: e.target.value })}
+                        classNames={{
+                            base: "w-full",
+                            input: "h-10",
+                        }}
                     />
                 </div>
                 <div className="flex items-center gap-2">
@@ -25,6 +29,10 @@ export function ExtraOralExamForm({ exam, onChange }: ExtraOralExamFormProps) {
                         size="sm"
                         value={exam.face}
                         onChange={(e) => onChange({ face: e.target.value })}
+                        classNames={{
+                            base: "w-full",
+                            input: "h-10",
+                        }}
                     />
                 </div>
                 <div className="flex items-center gap-2">
@@ -33,6 +41,10 @@ export function ExtraOralExamForm({ exam, onChange }: ExtraOralExamFormProps) {
                         size="sm"
                         value={exam.atm}
                         onChange={(e) => onChange({ atm: e.target.value })}
+                        classNames={{
+                            base: "w-full",
+                            input: "h-10",
+                        }}
                     />
                 </div>
                 <div className="flex items-center gap-2">
@@ -41,6 +53,10 @@ export function ExtraOralExamForm({ exam, onChange }: ExtraOralExamFormProps) {
                         size="sm"
                         value={exam.ganglios}
                         onChange={(e) => onChange({ ganglios: e.target.value })}
+                        classNames={{
+                            base: "w-full",
+                            input: "h-10",
+                        }}
                     />
                 </div>
                 <div className="flex items-center gap-2">
@@ -49,6 +65,10 @@ export function ExtraOralExamForm({ exam, onChange }: ExtraOralExamFormProps) {
                         size="sm"
                         value={exam.lips}
                         onChange={(e) => onChange({ lips: e.target.value })}
+                        classNames={{
+                            base: "w-full",
+                            input: "h-10",
+                        }}
                     />
                 </div>
             </div>

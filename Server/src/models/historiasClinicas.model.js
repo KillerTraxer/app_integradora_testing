@@ -22,7 +22,7 @@ const historiasClinicasSchema = mongoose.Schema({
         trim: true
     },
     fechaNacimiento: {
-        type: String,
+        type: mongoose.Schema.Types.Mixed,
         require: true,
         trim: true
     },
@@ -78,7 +78,11 @@ const historiasClinicasSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'tratamientos',
         require: false
-    }]
+    }],
+    downloadLink: {
+        type: String,
+        require: false
+    }
 })
 
 export default mongoose.model('historiasClinica', historiasClinicasSchema);

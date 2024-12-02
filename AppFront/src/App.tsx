@@ -22,6 +22,7 @@ import CitasPage from "@/pages/CitasPage"
 import PacientesPage from "@/pages/PacientesPage"
 import CitasDetallesPage from "@/pages/CitasDetallesPage"
 import CitaIniciadaPage from "@/pages/CitaIniciadaPage"
+import CalendarioCitasPage from "@/pages/CalendarioCitasPage"
 
 //! REGISTRO DE SERVICE WORKER
 function App() {
@@ -116,6 +117,7 @@ function App() {
         <Route path="/citas/:id" element={<PrivateRoute><Layout><CitasDetallesPage /></Layout></PrivateRoute>} />
         <Route path='/cita/iniciada/:id' element={<PrivateRoute><Layout><CitaIniciadaPage /></Layout></PrivateRoute>} />
         <Route path='/pacientes' element={<PrivateRoute><Layout><PacientesPage /></Layout></PrivateRoute>} />
+        <Route path='/calendario' element={<PrivateRoute><Layout><CalendarioCitasPage /></Layout></PrivateRoute>} />
       </Routes>
     </Router>
   )

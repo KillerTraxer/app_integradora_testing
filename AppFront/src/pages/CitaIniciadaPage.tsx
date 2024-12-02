@@ -33,8 +33,10 @@ export default function CitaIniciadaPage() {
     const [showTratamientoForm, setShowTratamientoForm] = useState(false);
     const [reload, setReload] = useState(false);
     const { data: hasHistorial, isLoading: isLoadingHistorial } = useFetchData(`/historiasClinicas/paciente/${appointmentDetails?.paciente}`, null, reload, !isLoadingDetails && appointmentDetails !== null);
+    const { data: hasTreatment, isLoading: isLoadingTreatments } = useFetchData(`/tratamientos/paciente/${appointmentDetails?.paciente}`, null, reload, !isLoadingDetails && appointmentDetails !== null);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+    const [fecha, setFecha] = useState('');
 
     const handleHideHistorialForm = () => {
         setShowHistorialForm(false);
@@ -68,7 +70,13 @@ export default function CitaIniciadaPage() {
         }
     }
 
-    if (isLoadingDetails || isLoadingPatientInfo) {
+    useEffect(() => {
+        if (!hasHistorial) return;
+        const fechaNacimiento = `${hasHistorial.fechaNacimiento.year}-${hasHistorial.fechaNacimiento.month.toString().padStart(2, '0')}-${hasHistorial.fechaNacimiento.day.toString().padStart(2, '0')}`;
+        setFecha(fechaNacimiento);
+    }, [hasHistorial]);
+
+    if (isLoadingDetails || isLoadingPatientInfo || isLoadingHistorial || isLoadingTreatments) {
         return (
             <div className="flex items-center justify-center h-screen">
                 <Spinner size='lg' />
@@ -76,12 +84,14 @@ export default function CitaIniciadaPage() {
         );
     }
 
+    console.log(hasTreatment);
+
     return (
         <>
             {showHistorialForm ? (
-                <HistorialClinicoForm onCreateHistorial={handleChangeReload} pacienteInfo={patientInfo} onHide={handleHideHistorialForm} motivo={appointmentDetails?.motivo} />
+                <HistorialClinicoForm fecha={fecha} hasHistorial={hasHistorial} onCreateHistorial={handleChangeReload} pacienteInfo={patientInfo} onHide={handleHideHistorialForm} motivo={appointmentDetails?.motivo} />
             ) : showTratamientoForm ? (
-                <TratamientoForm pacienteInfo={patientInfo} onHide={handleHideTratamientoForm} />
+                <TratamientoForm pacienteInfo={patientInfo} onHide={handleHideTratamientoForm} hasTreatment={hasTreatment} onCreateTratamiento={handleChangeReload} isLoadingTreatments={isLoadingTreatments} />
             ) : (
                 <>
                     <div className="flex flex-row gap-3 mb-4 items-center">

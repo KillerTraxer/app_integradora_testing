@@ -27,7 +27,7 @@ const itemsAdmin = [
     },
     {
         title: "Calendario",
-        url: "#",
+        url: "/calendario",
         icon: Calendar,
     },
     {
@@ -50,7 +50,7 @@ const itemsUser = [
     },
     {
         title: "Calendario",
-        url: "#",
+        url: "/calendario",
         icon: Calendar,
     },
     {

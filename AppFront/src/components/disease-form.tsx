@@ -15,6 +15,10 @@ function DiseaseRow({ name, disease, onChange }: any) {
             <Checkbox
                 isSelected={disease.hasSuffered}
                 onValueChange={(checked) => onChange(name, { hasSuffered: checked })}
+                classNames={{
+                    base: "w-full",
+                    wrapper: "w-5 h-5",
+                }}
             >
                 {disease.hasSuffered ? "Sí" : "No"}
             </Checkbox>
@@ -24,6 +28,10 @@ function DiseaseRow({ name, disease, onChange }: any) {
                 value={disease.treatment}
                 onChange={(e) => onChange(name, { treatment: e.target.value })}
                 isDisabled={!disease.hasSuffered}
+                classNames={{
+                    base: "w-full",
+                    input: "h-10",
+                }}
             />
         </div>
     );
@@ -67,13 +75,6 @@ export function DiseaseForm({
 
     return (
         <div>
-            <h2 className="text-xl font-semibold mb-2">
-                En el siguiente listado de enfermedades por favor marque si ha padecido alguna.
-            </h2>
-            <p className="text-base text-gray-600">
-                Si su respuesta es afirmativa por favor describa el tratamiento recibido.
-            </p>
-
             <div className="grid grid-cols-2 gap-x-8 gap-y-4 mt-6">
                 <div className="space-y-4">
                     {leftColumnDiseases.map((name) => (
@@ -101,10 +102,14 @@ export function DiseaseForm({
             <div className="mt-6">
                 <h3 className="text-sm font-semibold mb-2">OTROS, DESCRIBA CUALES:</h3>
                 <Input
-                    size="sm"
+                    size="lg"
                     value={otherDiseases}
                     onChange={(e) => onOtherDiseasesChange(e.target.value)}
                     className="w-full"
+                    classNames={{
+                        base: "w-full",
+                        input: "h-10",
+                    }}
                 />
             </div>
         </div>
