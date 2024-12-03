@@ -97,9 +97,11 @@ export default function TratamientoForm({ hasTreatment, pacienteInfo, onHide, on
             const horaPreferida = tratamiento.configuracion.horaPreferida;
 
             const fechaInicio = new Date();
+            //this was added
+            fechaInicio.setDate(fechaInicio.getDate() + frecuencia);
             fechaInicio.setHours(0, 0, 0, 0);
 
-            for (let i = 0; i < duracion * frecuencia; i++) {
+            for (let i = 0; i < duracion; i++) {
                 const fechaCita = new Date(fechaInicio);
                 fechaCita.setDate(fechaCita.getDate() + i * frecuencia);
                 fechaCita.setHours(horaPreferida.split(":")[0], horaPreferida.split(":")[1], 0, 0);
