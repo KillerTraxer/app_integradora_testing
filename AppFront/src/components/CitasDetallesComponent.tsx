@@ -191,7 +191,7 @@ export default function CitasDetallesComponent() {
             </div>
 
             <div className="flex flex-row justify-between mt-14 space-x-4">
-                {appointmentDetails.status === "confirmada" && appointmentDetails.tratamientoCita === null && (
+                {appointmentDetails.status === "confirmada" && (
                     <Button color="danger" variant="flat" onClick={() => setIsDialogOpen(true)}>Cancelar cita</Button>
                 )}
 
