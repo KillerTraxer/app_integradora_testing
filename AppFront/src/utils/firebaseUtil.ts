@@ -2,6 +2,8 @@ import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { getFirestore, collection, getDocs, onSnapshot, query, where, orderBy, limit, updateDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import { Capacitor } from '@capacitor/core';
+import { PushNotifications } from '@capacitor/push-notifications';
 
 const firebaseConfig = {
   apiKey: "AIzaSyAIK73AhjoyVb0WhWyl9BlmVtQ4cTB4-Us",
@@ -33,37 +35,59 @@ const db2 = getFirestore(app2, 'proyecto-d19a8.appspot.com');
 
 const messaging = getMessaging(app);
 
-const requestFCMToken = async () => {
-  try {
-    return Notification.requestPermission()
-      .then((permission) => {
-        if (permission === 'granted') {
-          return getToken(messaging, { vapidKey: vapidKey })
-        } else {
-          throw new Error('Notification permission not granted')
-        }
-      })
-      .catch((error) => {
-        console.error('Error getting FCM token:', error);
-      });
-  } catch (error) {
-    console.error('Error getting FCM token:', error);
+const isNativePlatform = Capacitor.isNativePlatform();
+
+const requestPushPermissions = async () => {
+  if (isNativePlatform) {
+    let permStatus = await PushNotifications.checkPermissions();
+    if (permStatus.receive === 'prompt') {
+      permStatus = await PushNotifications.requestPermissions();
+    }
+    if (permStatus.receive !== 'granted') {
+      throw new Error('User denied push notification permissions!');
+    }
+    await PushNotifications.register();
+  } else {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      throw new Error('Notification permission not granted');
+    }
   }
-}
+};
+
+const getFCMToken = async () => {
+  if (isNativePlatform) {
+    const result = await PushNotifications.addListener('registration', (token) => {
+      return token.value;
+    });
+    return result;
+  } else {
+    return getToken(messaging, { vapidKey: vapidKey });
+  }
+};
 
 const onMessageListener = () => {
-  return new Promise((resolve) => {
-    onMessage(messaging, (payload) => {
-      resolve(payload);
-    })
-  })
-}
+  if (isNativePlatform) {
+    return new Promise((resolve) => {
+      PushNotifications.addListener('pushNotificationReceived', (notification) => {
+        resolve(notification);
+      });
+    });
+  } else {
+    return new Promise((resolve) => {
+      onMessage(messaging, (payload) => {
+        resolve(payload);
+      });
+    });
+  }
+};
 
 const storage2 = getStorage(app2, 'proyecto-d19a8.appspot.com');
 
 
 export {
-  requestFCMToken,
+  requestPushPermissions,
+  getFCMToken,
   onMessageListener,
   db,
   db2,

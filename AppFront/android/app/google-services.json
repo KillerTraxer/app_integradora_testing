@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "640363061542",
+    "firebase_url": "https://cio-dental-default-rtdb.firebaseio.com",
+    "project_id": "cio-dental",
+    "storage_bucket": "cio-dental.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:640363061542:android:6718a110bdaba27836e1e7",
+        "android_client_info": {
+          "package_name": "com.dentalcare_web"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBlDoXjl9fyxEHph1hMjXe5DKmtEoAToh4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

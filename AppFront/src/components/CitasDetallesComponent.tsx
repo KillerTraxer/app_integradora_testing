@@ -21,6 +21,7 @@ import toastSuccess from "@/components/ui/toastSuccess";
 import toastError from "@/components/ui/toastError";
 import UpdateCitaForm from "./UpdateCitaForm";
 import { useNavigate } from "react-router-dom";
+import { Capacitor } from "@capacitor/core";
 
 // Extend dayjs with plugins
 dayjs.extend(utc)
@@ -42,6 +43,8 @@ export default function CitasDetallesComponent() {
     const [isLoading, setIsLoading] = useState(false);
     const [openModal, setOpenModal] = useState(false);
     const navigate = useNavigate();
+
+    const isMobile = Capacitor.isNativePlatform();
 
     useEffect(() => {
         if (!appointmentDetails?.fecha) {
@@ -188,11 +191,11 @@ export default function CitasDetallesComponent() {
             </div>
 
             <div className="flex flex-row justify-between mt-14 space-x-4">
-                {appointmentDetails.status === "confirmada" && (
+                {appointmentDetails.status === "confirmada" && appointmentDetails.tratamientoCita === null && (
                     <Button color="danger" variant="flat" onClick={() => setIsDialogOpen(true)}>Cancelar cita</Button>
                 )}
 
-                {appointmentDetails.status === "confirmada" && auth?.user.rol === "dentista" && (
+                {appointmentDetails.status === "confirmada" && auth?.user.rol === "dentista" && !isMobile && (
                     <div>
                         {canStartAppointment ? (
                             <Button

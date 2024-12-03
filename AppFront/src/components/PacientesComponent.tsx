@@ -22,6 +22,7 @@ import {
 } from "@nextui-org/react";
 import { EllipsisVertical, SearchIcon, ChevronDown } from "lucide-react";
 import useFetchData from "@/hooks/useFetchData";
+import { useNavigate } from "react-router-dom";
 
 const statusColorMap: Record<string, ChipProps["color"]> = {
     'sin tratamiento': 'warning',
@@ -32,6 +33,7 @@ const statusColorMap: Record<string, ChipProps["color"]> = {
 const INITIAL_VISIBLE_COLUMNS = ["nombre", "email", "status", "actions"];
 
 export default function PacientesComponent() {
+    const navigate = useNavigate();
     const { data: pacientes, isLoading: isLoadingPacientes } = useFetchData(`/pacientes`, null);
     const [filterValue, setFilterValue] = React.useState("");
     const [selectedKeys, setSelectedKeys] = React.useState<Selection>(new Set([]));
@@ -133,7 +135,7 @@ export default function PacientesComponent() {
                                 </Button>
                             </DropdownTrigger>
                             <DropdownMenu variant="shadow">
-                                <DropdownItem>Ver</DropdownItem>
+                                <DropdownItem onClick={() => navigate(`/pacientes/${paciente._id}`)}>Ver</DropdownItem>
                                 {/* <DropdownItem>Editar</DropdownItem> */}
                                 <DropdownItem color="danger">Eliminar</DropdownItem>
                             </DropdownMenu>

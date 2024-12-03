@@ -6,8 +6,9 @@ import PublicRoute from "@/routes/PublicRoute";
 import { useEffect } from 'react';
 import useAuthStore from './store/authStore';
 import { setupInterceptors } from './utils/axiosInterceptor';
-import { requestFCMToken, onMessageListener } from "@/utils/firebaseUtil"
+import { requestPushPermissions, getFCMToken, onMessageListener } from "@/utils/firebaseUtil"
 import api from "@/axiosInstance"
+import { Capacitor } from '@capacitor/core';
 
 import Home from "@/pages/Home";
 import Layout from "@/pages/Layout"
@@ -23,11 +24,24 @@ import PacientesPage from "@/pages/PacientesPage"
 import CitasDetallesPage from "@/pages/CitasDetallesPage"
 import CitaIniciadaPage from "@/pages/CitaIniciadaPage"
 import CalendarioCitasPage from "@/pages/CalendarioCitasPage"
+import ListOfTreatments from './components/ListOfTreatments';
 
-//! REGISTRO DE SERVICE WORKER
+import PacientesInfo from "@/components/PacientesInfo"
+
 function App() {
+  const { setAuth, clearAuth, auth } = useAuthStore();
+  const isNativePlatform = Capacitor.isNativePlatform();
+
   useEffect(() => {
-    if ('serviceWorker' in navigator) {
+    setupInterceptors(
+      () => useAuthStore.getState().auth,
+      setAuth,
+      clearAuth
+    );
+  }, []);
+
+  useEffect(() => {
+    if (!isNativePlatform && 'serviceWorker' in navigator) {
       navigator.serviceWorker
         .register('/firebase-messaging-sw.js')
         .then((registration) => {
@@ -39,21 +53,13 @@ function App() {
     }
   }, []);
 
-  const { setAuth, clearAuth, auth } = useAuthStore();
-
-  useEffect(() => {
-    setupInterceptors(
-      () => useAuthStore.getState().auth,
-      setAuth,
-      clearAuth
-    );
-  }, []);
-
   const fetchFCMToken = async () => {
     try {
-      const token = await requestFCMToken();
+      await requestPushPermissions();
+      const token = await getFCMToken();
       //@ts-ignore
       localStorage.setItem('fcmToken', token);
+      console.log('Token FCM obtenido:', token);
     } catch (error) {
       console.error('Error al obtener el token FCM:', error);
     }
@@ -88,15 +94,24 @@ function App() {
     }
   }, [auth]);
 
-  onMessageListener().then((payload: any) => {
-    toast.info(
-      <div>
-        <p className='font-semibold text-base text-[#e8e8e8]'>{payload.notification.title}</p>
-        <p className='font-normal text-sm text-[#e8e8e8]'>{payload.notification.body}</p>
-      </div>,
-      { position: "bottom-right", theme: "colored" }
-    );
-  }).catch(err => console.error("error: ", err))
+  useEffect(() => {
+    const unsubscribe = onMessageListener().then((payload: any) => {
+      toast.info(
+        <div>
+          <p className='font-semibold text-base text-[#e8e8e8]'>{payload.notification.title}</p>
+          <p className='font-normal text-sm text-[#e8e8e8]'>{payload.notification.body}</p>
+        </div>,
+        { position: "bottom-right", theme: "colored" }
+      );
+    }).catch(err => console.error("error: ", err));
+
+    return () => {
+      if (typeof unsubscribe === 'function') {
+        //@ts-ignore
+        unsubscribe();
+      }
+    };
+  }, []);
 
   return (
     <Router>
@@ -117,7 +132,9 @@ function App() {
         <Route path="/citas/:id" element={<PrivateRoute><Layout><CitasDetallesPage /></Layout></PrivateRoute>} />
         <Route path='/cita/iniciada/:id' element={<PrivateRoute><Layout><CitaIniciadaPage /></Layout></PrivateRoute>} />
         <Route path='/pacientes' element={<PrivateRoute><Layout><PacientesPage /></Layout></PrivateRoute>} />
+        <Route path='/pacientes/:id' element={<PrivateRoute><Layout><PacientesInfo /></Layout></PrivateRoute>} />
         <Route path='/calendario' element={<PrivateRoute><Layout><CalendarioCitasPage /></Layout></PrivateRoute>} />
+        <Route path='/tratamientos' element={<PrivateRoute><Layout><ListOfTreatments /></Layout></PrivateRoute>} />
       </Routes>
     </Router>
   )

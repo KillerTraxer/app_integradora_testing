@@ -60,7 +60,7 @@ const itemsUser = [
     },
     {
         title: "Tratamientos",
-        url: "#",
+        url: "/tratamientos",
         icon: CalendarHeart,
     },
 ]

@@ -1,9 +1,20 @@
 import Citas from "../models/citas.model.js";
 import firebaseAdmin from "../firebase.js";
 import dayjs from "dayjs"
-import { ObjectId } from "mongodb"
+import nodemailer from "nodemailer";
 
 const { firestore, admin } = firebaseAdmin;
+
+const userGmail = process.env.USER_GMAIL;
+const passAppGmail = process.env.PASS_APP_GMAIL;
+
+const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+        user: userGmail,
+        pass: passAppGmail,
+    },
+});
 
 export async function countCitas(req, res) {
     try {
@@ -71,6 +82,8 @@ export const postCita = async (req, res) => {
         const dentistaRef = firestore.collection('dentistas').doc(dentistaId);
         const dentistaDoc = await dentistaRef.get();
 
+        const dentistaEmail = pacienteDoc.data().email;
+
         const fcmTokens = dentistaDoc.get('fcmTokens') || [];
 
         const fechaFormateada = dayjs(fecha).locale('es').format('D [de] MMMM [del] YYYY [a las] h:mm A');
@@ -105,6 +118,24 @@ export const postCita = async (req, res) => {
                         console.log('Error sending message:', error);
                     });
             })
+        }
+
+        try {
+            transporter.sendMail({
+                from: 'Dental Care <no-reply@dentalcare.com>',
+                to: dentistaEmail,
+                subject: `Nueva cita agendada`,
+                html: `
+                    <div style="padding: 20px; font-family: Arial, sans-serif;">
+                        <h2>Dental Care</h2>
+                        <h1>Una nueva cita ha sido agendada</h1>
+                        <p>El paciente ${pacienteNombre} ha agendado una nueva cita para el día ${fechaFormateada}</p>
+                    </div>
+                `,
+            });
+        } catch (error) {
+            console.error("Error al enviar el email:", error);
+            return res.status(500).json({ error: "Error al enviar el email." });
         }
 
         res.json({ "message": "Realizado con éxito" });
@@ -183,6 +214,24 @@ export const patchCita = async (req, res) => {
             };
 
             await firestore.collection("notificaciones").add(notification);
+
+            try {
+                transporter.sendMail({
+                    from: 'Dental Care <no-reply@dentalcare.com>',
+                    to: dentistaDoc.get('email'),
+                    subject: `Cita actualizada`,
+                    html: `
+                        <div style="padding: 20px; font-family: Arial, sans-serif;">
+                            <h2>Dental Care</h2>
+                            <h1>La cita ha sido actualizada</h1>
+                            <p>El dentista ${dentistaDoc.get('nombre')} ha modificado la cita para el día ${fechaFormateada}</p>
+                        </div>
+                    `,
+                });
+            } catch (error) {
+                console.error("Error al enviar el email:", error);
+                return res.status(500).json({ error: "Error al enviar el email." });
+            }
         } else if (req.body.cambiadaPor === 'paciente') {
             // Envía la notificación al dentista
             if (dentistaTokens.length > 0) {
@@ -218,6 +267,24 @@ export const patchCita = async (req, res) => {
             };
 
             await firestore.collection("notificaciones").add(notification);
+
+            try {
+                transporter.sendMail({
+                    from: 'Dental Care <no-reply@dentalcare.com>',
+                    to: pacienteDoc.get('email'),
+                    subject: `Cita actualizada`,
+                    html: `
+                        <div style="padding: 20px; font-family: Arial, sans-serif;">
+                            <h2>Dental Care</h2>
+                            <h1>La cita ha sido actualizada</h1>
+                            <p>El paciente ${pacienteDoc.get('nombre')} ha modificado la cita para el día ${fechaFormateada}</p>
+                        </div>
+                    `,
+                });
+            } catch (error) {
+                console.error("Error al enviar el email:", error);
+                return res.status(500).json({ error: "Error al enviar el email." });
+            }
         }
 
         res.json({ "message": "Realizado con exito" });
@@ -297,6 +364,24 @@ export const changeStatusCita = async (req, res) => {
                 };
 
                 await firestore.collection("notificaciones").add(notification);
+
+                try {
+                    transporter.sendMail({
+                        from: 'Dental Care <no-reply@dentalcare.com>',
+                        to: dentistaDoc.get('email'),
+                        subject: `Cita cancelada`,
+                        html: `
+                            <div style="padding: 20px; font-family: Arial, sans-serif;">
+                                <h2>Dental Care</h2>
+                                <h1>La cita ha sido cancelada</h1>
+                                <p>El dentista ${dentistaDoc.get('nombre')} ha cancelado la cita para el día ${fechaFormateada}</p>
+                            </div>
+                        `,
+                    });
+                } catch (error) {
+                    console.error("Error al enviar el email:", error);
+                    return res.status(500).json({ error: "Error al enviar el email." });
+                }
             } else if (req.body.canceladoPor === 'paciente') {
                 // Envía la notificación al dentista
                 if (dentistaTokens.length > 0) {
@@ -332,6 +417,24 @@ export const changeStatusCita = async (req, res) => {
                 };
 
                 await firestore.collection("notificaciones").add(notification);
+
+                try {
+                    transporter.sendMail({
+                        from: 'Dental Care <no-reply@dentalcare.com>',
+                        to: pacienteDoc.get('email'),
+                        subject: `Cita cancelada`,
+                        html: `
+                            <div style="padding: 20px; font-family: Arial, sans-serif;">
+                                <h2>Dental Care</h2>
+                                <h1>La cita ha sido cancelada</h1>
+                                <p>El paciente ${pacienteDoc.get('nombre')} ha cancelado la cita para el día ${fechaFormateada}</p>
+                            </div>
+                        `,
+                    });
+                } catch (error) {
+                    console.error("Error al enviar el email:", error);
+                    return res.status(500).json({ error: "Error al enviar el email." });
+                }
             }
         }
 

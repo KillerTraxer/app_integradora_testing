@@ -109,8 +109,8 @@ export default function ConfiguracionTratamiento({ tratamientos, actualizarTrata
                             className={`input-date-bg rounded-xl flex relative p-2`}
                         >
                             <TimePicker
-                                defaultValue={dayjs(tratamiento.configuracion.horaPreferida, 'HH:mm')}
-                                // value={tratamiento.configuracion.horaPreferida}
+                                // defaultValue={tratamiento.configuracion.horaPreferida && !/^\d{2}:\d{2}$/.test(tratamiento.configuracion.horaPreferida) ? dayjs(tratamiento.configuracion.horaPreferida, 'HH:mm') : tratamiento.configuracion.horaPreferida}                                // value={tratamiento.configuracion.horaPreferida}
+                                defaultValue={tratamiento.configuracion.horaPreferida ? dayjs(tratamiento.configuracion.horaPreferida, 'HH:mm') : null}
                                 onChange={(dateString: any) => {
                                     const date = dayjs(dateString, 'DD/MM/YYYY HH:mm:ss');
                                     actualizarTratamiento(tratamiento.id, 'configuracion', {

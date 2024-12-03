@@ -21,7 +21,7 @@ export default function TratamientoForm({ hasTreatment, pacienteInfo, onHide, on
     const [submitStatus, setSubmitStatus] = useState<string | null>(null)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-    console.log(isLoadingTreatments)
+    console.log(hasTreatment)
 
     const [tratamientos, setTratamientos] = useState(
         hasTreatment && hasTreatment.length > 0
@@ -71,8 +71,56 @@ export default function TratamientoForm({ hasTreatment, pacienteInfo, onHide, on
     }
 
     const formatHoraPreferida = (horaPreferida: any) => {
-        return horaPreferida.$H + ':' + horaPreferida.$m.toString().padStart(2, '0');
+        if (typeof horaPreferida === 'string') {
+            return horaPreferida;
+        } else {
+            return horaPreferida.$H + ':' + horaPreferida.$m.toString().padStart(2, '0');
+        }
     }
+
+    const colores = [
+        'bg-green-500',
+        'bg-orange-500',
+        'bg-purple-500',
+        'bg-yellow-500',
+        'bg-blue-200',
+        'bg-red-500',
+    ];
+
+    const generarCitas = (tratamientos: any[]) => {
+        //@ts-ignore
+        const citas = [];
+
+        tratamientos.forEach((tratamiento) => {
+            const duracion = tratamiento.configuracion.duracion.valor;
+            const frecuencia = tratamiento.configuracion.frecuencia;
+            const horaPreferida = tratamiento.configuracion.horaPreferida;
+
+            const fechaInicio = new Date();
+            fechaInicio.setHours(0, 0, 0, 0);
+
+            for (let i = 0; i < duracion * frecuencia; i++) {
+                const fechaCita = new Date(fechaInicio);
+                fechaCita.setDate(fechaCita.getDate() + i * frecuencia);
+                fechaCita.setHours(horaPreferida.split(":")[0], horaPreferida.split(":")[1], 0, 0);
+                const motivo = `Cita ${i + 1}: ${tratamiento.general}`;
+                const colorCita = colores[Math.floor(Math.random() * colores.length)];
+
+                citas.push({
+                    paciente: pacienteInfo._id,
+                    dentista: auth?.user._id,
+                    fecha: fechaCita.toISOString(),
+                    status: 'confirmada',
+                    tratamientoCita: tratamiento._id,
+                    motivo: motivo,
+                    colorCita: colorCita
+                });
+            }
+        });
+
+        //@ts-ignore
+        return citas;
+    };
 
     const formik = useFormik({
         initialValues: {
@@ -83,35 +131,64 @@ export default function TratamientoForm({ hasTreatment, pacienteInfo, onHide, on
             setSubmitStatus(null);
 
             const tratamientosFormateados = tratamientos.map((tratamiento: any) => ({
-                ...tratamiento,
+                _id: tratamiento.id,
+                general: tratamiento.general,
+                fases: tratamiento.fases,
                 configuracion: {
                     ...tratamiento.configuracion,
                     horaPreferida: formatHoraPreferida(tratamiento.configuracion.horaPreferida)
                 }
             }));
 
-            try {
-                await axiosInstanceWithAuth.post(`/tratamientos`, {
-                    dentista: auth?.user._id,
-                    paciente: pacienteInfo._id,
-                    tratamientos: tratamientosFormateados
-                });
+            const citas = generarCitas(tratamientosFormateados);
 
-                toastSuccess({ message: 'Tratamiento creado exitosamente' });
-                setIsDialogOpen(false);
-                onHide();
-                onCreateTratamiento();
-            } catch (error: any) {
-                if (error.response && error.response.status === 400) {
-                    const { errors } = error.response.data;
+            if (hasTreatment.length > 0) {
+                try {
+                    tratamientosFormateados.forEach((tratamiento: any) => {
+                        axiosInstanceWithAuth.put(`/tratamientos/${tratamiento._id}`, tratamiento);
+                    });
 
-                    console.log(errors)
-                    setSubmitStatus(errors);
-                } else {
-                    setSubmitStatus("Error inesperado en el servidor. Por favor, intenta de nuevo más tarde.");
+                    toastSuccess({ message: 'Tratamiento actualizado exitosamente' });
+                    setIsDialogOpen(false);
+                    onHide();
+                    onCreateTratamiento();
+                } catch (error: any) {
+                    if (error.response && error.response.status === 400) {
+                        const { errors } = error.response.data;
+
+                        console.log(errors)
+                        setSubmitStatus(errors);
+                    } else {
+                        setSubmitStatus("Error inesperado en el servidor. Por favor, intenta de nuevo más tarde.");
+                    }
+                } finally {
+                    setLoading(false);
                 }
-            } finally {
-                setLoading(false);
+            } else {
+                try {
+                    await axiosInstanceWithAuth.post(`/tratamientos`, {
+                        dentista: auth?.user._id,
+                        paciente: pacienteInfo._id,
+                        tratamientos: tratamientosFormateados,
+                        citas
+                    });
+
+                    toastSuccess({ message: 'Tratamiento creado exitosamente' });
+                    setIsDialogOpen(false);
+                    onHide();
+                    onCreateTratamiento();
+                } catch (error: any) {
+                    if (error.response && error.response.status === 400) {
+                        const { errors } = error.response.data;
+
+                        console.log(errors)
+                        setSubmitStatus(errors);
+                    } else {
+                        setSubmitStatus("Error inesperado en el servidor. Por favor, intenta de nuevo más tarde.");
+                    }
+                } finally {
+                    setLoading(false);
+                }
             }
         },
     });

@@ -14,10 +14,11 @@ dayjs.extend(timezone)
 dayjs.extend(isSameOrAfter)
 dayjs.locale('es')
 
-export default function ListOfAppointmentsUser({ newAppointmentCreated, onResetNewAppointmentCreated }: any) {
+export default function ListOfAppointmentsUser({ newAppointmentCreated, onResetNewAppointmentCreated, patientId }: any) {
     const navigate = useNavigate();
     const { auth } = useAuthStore();
-    const { data: citas, isLoading: isLoadingCitas } = useFetchData(`/citas/paciente/${auth?.user._id}`, null, newAppointmentCreated);
+    const idPaciente = patientId || auth?.user._id;
+    const { data: citas, isLoading: isLoadingCitas } = useFetchData(`/citas/paciente/${idPaciente}`, null, newAppointmentCreated);
 
     let events = [] as any;
 

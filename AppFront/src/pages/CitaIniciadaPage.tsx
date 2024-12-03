@@ -119,7 +119,7 @@ export default function CitaIniciadaPage() {
                             onClick={() => setShowHistorialForm(true)}
                             isLoading={isLoadingHistorial}
                         >
-                            Crear historial clínico
+                            {hasHistorial ? 'Editar historial clínico' : 'Crear historial clínico'}
                         </Button>
 
                         {!hasHistorial ? (
@@ -140,7 +140,7 @@ export default function CitaIniciadaPage() {
                                 onClick={() => setShowTratamientoForm(true)}
                                 isLoading={isLoadingHistorial}
                             >
-                                Crear tratamiento
+                                {hasTreatment ? 'Editar tratamiento' : 'Crear tratamiento'}
                             </Button>
                         )}
 

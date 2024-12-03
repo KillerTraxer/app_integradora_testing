@@ -1,6 +1,8 @@
 import Tratamiento from "../models/tratamientos.model.js";
 import historiasClinica from "../models/historiasClinicas.model.js";
 import Paciente from "../models/pacientes.model.js";
+import Citas from "../models/citas.model.js";
+import mongoose from "mongoose";
 
 export const getTratamientos = async (req, res) => {
     try {
@@ -41,7 +43,7 @@ export const getTratamientosByPaciente = async (req, res) => {
 
 export const postTratamiento = async (req, res) => {
     try {
-        const { paciente, dentista, tratamientos } = req.body;
+        const { paciente, dentista, tratamientos, citas } = req.body;
 
         if (!dentista || !paciente) {
             return res.status(400).json({ error: 'Faltan campos obligatorios' });
@@ -71,6 +73,23 @@ export const postTratamiento = async (req, res) => {
             // Guardar el tratamiento en la base de datos
             const savedTratamiento = await nuevoTratamiento.save();
             tratamientoIds.push(savedTratamiento._id);
+
+            for (const cita of citas) {
+                const tratamientoCitaId = cita.tratamientoCita.toString(16);
+                const tratamientoCitaIdPadded = tratamientoCitaId.padStart(24, '0');
+
+                const nuevaCita = new Citas({
+                    paciente: paciente,
+                    dentista: dentista,
+                    fecha: cita.fecha,
+                    status: cita.status,
+                    tratamientoCita: new mongoose.Types.ObjectId(tratamientoCitaIdPadded),
+                    motivo: cita.motivo,
+                    colorCita: cita.colorCita
+                });
+
+                await nuevaCita.save();
+            }
 
             // Buscar el historial clínico del paciente
             const historiaClinica = await historiasClinica.findOne({ paciente: paciente }).exec();
