@@ -99,10 +99,16 @@ export default function TratamientoForm({ hasTreatment, pacienteInfo, onHide, on
             const fechaInicio = new Date();
             fechaInicio.setHours(0, 0, 0, 0);
 
-            for (let i = 0; i < duracion * frecuencia; i++) {
+            for (let i = 0; i < duracion; i++) {
                 const fechaCita = new Date(fechaInicio);
-                fechaCita.setDate(fechaCita.getDate() + i * frecuencia);
-                fechaCita.setHours(horaPreferida.split(":")[0], horaPreferida.split(":")[1], 0, 0);
+                // Calculamos la fecha de la cita sumando la frecuencia * i + frecuencia
+                fechaCita.setDate(fechaCita.getDate() + (i + 1) * frecuencia);
+                fechaCita.setHours(
+                    parseInt(horaPreferida.split(":")[0]),
+                    parseInt(horaPreferida.split(":")[1]),
+                    0,
+                    0
+                );
                 const motivo = `Cita ${i + 1}: ${tratamiento.general}`;
                 const colorCita = colores[Math.floor(Math.random() * colores.length)];
 
