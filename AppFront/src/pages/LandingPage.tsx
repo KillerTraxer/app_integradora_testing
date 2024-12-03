@@ -5,7 +5,7 @@ import Doctor from '../assets/doctor_landing.png';
 import Logo from '../assets/logo_landing.svg';
 import DentistHomeIcon1 from "../assets/dentist4-home-icon1.png";
 import DentistHomeIcon2 from "../assets/dentist4-home-icon2.png";
-import DentistHomeIcon3 from "../assets/dentist4-home-icon3.png";
+// import DentistHomeIcon3 from "../assets/dentist4-home-icon3.png";
 import Odontopediatria from "../assets/child.jpg";
 import Ortodoncia from "../assets/ortodoncia.jpg";
 import Cirugia from "../assets/cirugia.jpg";
